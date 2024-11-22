@@ -1,0 +1,18 @@
+[
+    {
+        "id": 1,
+        "name": "Amazon",
+        "description": "🎁 Obtén un 10% de descuento en tu 1ra compra",
+        "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZGYO4C9MB4L26stq6ROPG0k8S-ARsUPG6dGw_hjd8Tg&s",
+        "link": "https://www.amazon.com",
+        "expiresIn": 1700000000000
+    },
+    {
+        "id": 2,
+        "name": "Star+",
+        "description": "🎁 Suscríbete y recibe un mes gratis",
+        "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIWs53-bMdTldLdd0uQlH49XcD0Cz-WLn4gA&usqp=CAU",
+        "link": "https://www.star+.com",
+        "expiresIn": 1700100000000
+    }
+]
