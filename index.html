@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cupones de Descuento</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        h1 {
+            background-color: red;
+            color: white;
+            text-align: center;
+            font-size: 20px;
+            padding: 15px;
+            margin: 0 0 20px 0;
+        }
+
+        .search-bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            width: 90%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        /* Contenedor para la imagen debajo de la barra de búsqueda */
+        .image-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px; /* Espacio antes de la imagen */
+        }
+
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px; /* Opcional: para bordes redondeados */
+            cursor: pointer;
+        }
+
+        .container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 10px; /* Espacio entre tarjetas */
+        margin: 0 auto; /* Centrar el contenedor */
+        max-width: 1000px; /* Ancho máximo para la disposición */
+    }
+
+    .card {
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 20px;
+        width: calc(40% - 10px); /* Ajusta al 50% menos el espacio del gap */
+        text-align: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+        .card img {
+            max-width: 100%;
+            border-radius: 4px;
+        }
+
+        .countdown {
+            font-size: 0.9em; /* Reduce el tamaño */
+            margin: 10px 0;
+            color: red; /* Opcional: Cambia el color si deseas */
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        /* CSS para ajuste dinámico del texto */
+        .card h3, .card p {
+            font-size: clamp(14px, 2vw, 18px);
+        }
+    </style>
+</head>
+<body>
+
+<h1>🛍 Cupones de descuentos</h1>
+
+<div class="search-bar">
+    <input type="text" id="search" placeholder="Buscar cupones...">
+</div>
+
+<!-- Contenedor de la imagen con enlace dinámico -->
+<div class="image-container">
+    <a href="https://www.tu-enlace-aqui.com" target="_blank">
+        <img src="https://i.ibb.co/FDb4YDk/santa.png" alt="" id="promoImage">
+    </a>
+</div>
+
+<div class="container" id="coupon-container">
+    <div class="card">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZGYO4C9MB4L26stq6ROPG0k8S-ARsUPG6dGw_hjd8Tg&s" alt="Amazon">
+        <h3>Amazon</h3>
+        <p>🎁 Obtén un 10% de descuento en tu 1ra compra</p>
+        <div class="countdown" id="countdown1"></div>
+        <a href="https://www.amazon.com" target="_blank">
+            <button>🎫 Cupón de descuento</button>
+        </a>
+    </div>
+    <div class="card">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIWs53-bMdTldLdd0uQlH49XcD0Cz-WLn4gA&usqp=CAU" alt="Star+">
+        <h3>Star+</h3>
+        <p>🎁 Suscríbete y recibe un mes gratis</p>
+        <div class="countdown" id="countdown2"></div>
+        <a href="https://www.star+.com" target="_blank">
+            <button>🎫 Cupón de descuento</button>
+        </a>
+    </div>
+    <div class="card">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQg4gZ1QEeKB2uyiu_3yqb1Al5v_hJqA3ndoYuYBA4Qsg&s" alt="Play Store">
+        <h3>Play Store</h3>
+        <p>🎁 Un 15% de descuento en tu primera compra</p>
+        <div class="countdown" id="countdown3"></div>
+        <a href="https://www.playstore.com" target="_blank">
+            <button>🎫 Cupón de descuento</button>
+        </a>
+    </div>
+    <div class="card">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaV6zY9NeHgfEn144TUE51B9LkrzGJG2wwHaCHZWtmqQ&s" alt="Netflix">
+        <h3>Netflix</h3>
+        <p>🎁 Prueba gratuita de un mes en Netflix</p>
+        <div class="countdown" id="countdown4"></div>
+        <a href="https://www.netflix.com" target="_blank">
+            <button>🎫 Cupón de descuento</button>
+        </a>
+    </div>
+</div>
+
+<script>
+    // Inicializar cuenta regresiva con almacenamiento local
+    function startCountdown(id, duration) {
+        const countdownElement = document.getElementById(id);
+        const savedTime = localStorage.getItem(id);
+        const endTime = savedTime ? parseInt(savedTime, 10) : Date.now() + duration * 1000;
+
+        localStorage.setItem(id, endTime);
+
+        const updateCountdown = () => {
+            const now = Date.now();
+            const remainingTime = Math.max(0, Math.floor((endTime - now) / 1000));
+            const hours = Math.floor(remainingTime / 3600);
+            const minutes = Math.floor((remainingTime % 3600) / 60);
+            const seconds = remainingTime % 60;
+
+            countdownElement.textContent = remainingTime > 0
+                ? `${hours}h ${minutes}m ${seconds}s`
+                : "¡Expiró!";
+        };
+
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+    }
+
+    // Filtrar cupones por búsqueda
+    document.getElementById('search').addEventListener('input', function () {
+        const query = this.value.toLowerCase();
+        const cards = document.querySelectorAll('.card');
+
+        cards.forEach(card => {
+            const title = card.querySelector('h3').textContent.toLowerCase();
+            card.style.display = title.includes(query) ? 'block' : 'none';
+        });
+    });
+
+    window.onload = function () {
+        startCountdown("countdown1", 86400);
+        startCountdown("countdown2", 86400);
+        startCountdown("countdown3", 86400);
+        startCountdown("countdown4", 86400);
+    };
+</script>
+
+</body>
+</html>
