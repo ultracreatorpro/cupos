@@ -1,435 +1,305 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-import { 
-    getFirestore, 
-    doc, 
-    setDoc, 
-    onSnapshot, 
-    getDoc,
-    updateDoc,
-    serverTimestamp
-} from 'firebase/firestore';
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Roguelike HTML5 con IA</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        canvas {
+            background-color: #000;
+            border: 2px solid #555;
+            border-radius: 8px;
+            max-width: 100%;
+            max-height: 60vh;
+        }
+        #ui-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+            width: 100%;
+            max-width: 640px;
+        }
+        #info {
+            font-size: 1.2em;
+            width: 100%;
+            text-align: center;
+        }
+        #descriptionBox {
+            background-color: #252525;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 15px;
+            min-height: 60px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            color: #b0e0e6; /* Un color azul pálido para el texto de la IA */
+            font-style: italic;
+        }
+        .gemini-button {
+            background: linear-gradient(45deg, #4f46e5, #c026d3);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .gemini-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+        .gemini-button:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .controls {
+            margin-top: 10px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <h1>Roguelike con IA</h1>
+    <canvas id="gameCanvas" width="640" height="480"></canvas>
+    <div id="ui-container">
+        <div id="info">Nivel: 1 | Tesoro: 0</div>
+        <div id="descriptionBox">Mueve a tu personaje y haz clic en el botón para obtener una descripción de tu entorno.</div>
+        <button id="geminiBtn" class="gemini-button">✨ Describir la sala</button>
+    </div>
+    <div class="controls">Usa las teclas de flecha para moverte.</div>
 
-// --- Configuración de Firebase ---
-// Las variables __app_id, __firebase_config y __initial_auth_token
-// son proporcionadas por el entorno de ejecución.
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const infoDiv = document.getElementById('info');
+        const descriptionBox = document.getElementById('descriptionBox');
+        const geminiBtn = document.getElementById('geminiBtn');
 
-// --- Componente de Celda del Tablero ---
-const Cell = ({ value, onClick, isWinning }) => (
-    <button
-        onClick={onClick}
-        className={`w-24 h-24 md:w-32 md:h-32 bg-gray-800 rounded-lg flex items-center justify-center text-6xl font-bold transition-all duration-200 ease-in-out
-        ${isWinning ? 'bg-emerald-500 text-white' : 'text-gray-400 hover:bg-gray-700'}
-        ${value === 'X' ? 'text-cyan-400' : 'text-amber-400'}`}
-        disabled={!!value}
-    >
-        {value}
-    </button>
-);
+        const TILE_SIZE = 32;
+        const MAP_WIDTH = canvas.width / TILE_SIZE;
+        const MAP_HEIGHT = canvas.height / TILE_SIZE;
 
-// --- Componente Principal de la App ---
-export default function App() {
-    // --- Estados del Componente ---
-    const [gameMode, setGameMode] = useState('menu'); // 'menu', 'pva', 'pvp_setup', 'pvp'
-    const [board, setBoard] = useState(Array(9).fill(null));
-    const [isXNext, setIsXNext] = useState(true);
-    const [winnerInfo, setWinnerInfo] = useState(null); // { winner: 'X'/'O'/'draw', line: [...] }
-    const [status, setStatus] = useState("¡Elige un modo de juego!");
+        // --- Estado del Juego ---
+        let player = { x: 1, y: 1 };
+        let treasures = [];
+        let exit = { x: 0, y: 0 };
+        let map = [];
+        let score = 0;
+        let level = 1;
 
-    // Estados de Firebase y Multijugador
-    const [db, setDb] = useState(null);
-    const [auth, setAuth] = useState(null);
-    const [userId, setUserId] = useState(null);
-    const [isAuthReady, setIsAuthReady] = useState(false);
-    const [gameId, setGameId] = useState('');
-    const [joinGameId, setJoinGameId] = useState('');
-    const [playerSymbol, setPlayerSymbol] = useState(null); // 'X' o 'O' en modo pvp
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
-    
-    // --- Inicialización de Firebase ---
-    useEffect(() => {
-        try {
-            const app = initializeApp(firebaseConfig);
-            const firestoreDb = getFirestore(app);
-            const firebaseAuth = getAuth(app);
-            setDb(firestoreDb);
-            setAuth(firebaseAuth);
+        // --- Generación del Mapa ---
+        function generateLevel() {
+            // 1. Llenar todo de muros
+            map = Array(MAP_WIDTH).fill(0).map(() => Array(MAP_HEIGHT).fill(1)); // 1 = Muro
 
-            onAuthStateChanged(firebaseAuth, async (user) => {
-                if (user) {
-                    setUserId(user.uid);
-                } else {
-                    await signInAnonymously(firebaseAuth);
+            let x = Math.floor(MAP_WIDTH / 2);
+            let y = Math.floor(MAP_HEIGHT / 2);
+            const totalTiles = MAP_WIDTH * MAP_HEIGHT;
+            const floorTilesToCreate = totalTiles / 2.5;
+            let floorsCreated = 0;
+
+            // 2. "Cavar" túneles aleatoriamente
+            while (floorsCreated < floorTilesToCreate) {
+                if (map[x][y] === 1) {
+                    map[x][y] = 0; // 0 = Suelo
+                    floorsCreated++;
                 }
-                setIsAuthReady(true);
-            });
-        } catch (e) {
-            console.error("Error al inicializar Firebase:", e);
-            setError("No se pudo conectar a los servicios del juego.");
-        }
-    }, []);
-
-    // --- Lógica del Juego ---
-    const calculateWinner = useCallback((squares) => {
-        const lines = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Filas
-            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columnas
-            [0, 4, 8], [2, 4, 6]             // Diagonales
-        ];
-        for (let i = 0; i < lines.length; i++) {
-            const [a, b, c] = lines[i];
-            if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-                return { winner: squares[a], line: lines[i] };
-            }
-        }
-        if (squares.every(Boolean)) {
-            return { winner: 'draw', line: [] };
-        }
-        return null;
-    }, []);
-    
-    // --- Actualización de Estado y Turno de la IA ---
-    useEffect(() => {
-        const newWinnerInfo = calculateWinner(board);
-        if (newWinnerInfo) {
-            setWinnerInfo(newWinnerInfo);
-            if (newWinnerInfo.winner === 'draw') {
-                setStatus('¡Es un empate!');
-            } else {
-                setStatus(`¡El ganador es ${newWinnerInfo.winner}!`);
-            }
-        } else {
-            const currentPlayer = isXNext ? 'X' : 'O';
-            setStatus(`Turno de ${currentPlayer}`);
-
-            // Turno de la IA
-            if (gameMode === 'pva' && !isXNext && !newWinnerInfo) {
-                const timer = setTimeout(() => {
-                    aiMove(board);
-                }, 500);
-                return () => clearTimeout(timer);
-            }
-        }
-    }, [board, isXNext, gameMode, calculateWinner]);
-
-    // --- Listener de Firestore para Partidas PVP ---
-    useEffect(() => {
-        if (gameMode !== 'pvp' || !gameId || !db) return;
-
-        const gameRef = doc(db, `artifacts/${appId}/public/data/tic-tac-toe-games`, gameId);
-        const unsubscribe = onSnapshot(gameRef, (docSnap) => {
-            if (docSnap.exists()) {
-                const gameData = docSnap.data();
-                setBoard(gameData.board);
-                setIsXNext(gameData.isXNext);
-                
-                // Asignar rol si aún no está asignado
-                if (userId && !gameData.players.O && gameData.players.X !== userId) {
-                    setPlayerSymbol('O');
-                } else if (userId && gameData.players.X === userId) {
-                    setPlayerSymbol('X');
-                }
-            } else {
-                setError("La partida ya no existe.");
-                resetGame();
-            }
-        });
-
-        return () => unsubscribe();
-    }, [gameMode, gameId, db, userId, appId]);
-
-    // --- Manejador de Clics en Celdas ---
-    const handleCellClick = async (index) => {
-        if (winnerInfo || board[index]) return;
-        
-        const currentPlayer = isXNext ? 'X' : 'O';
-
-        if (gameMode === 'pva') {
-            if (!isXNext) return; // No permitir clic si es turno de la IA
-            const newBoard = board.slice();
-            newBoard[index] = 'X';
-            setBoard(newBoard);
-            setIsXNext(false);
-        } else if (gameMode === 'pvp') {
-            if (playerSymbol !== currentPlayer) {
-                 setError("No es tu turno.");
-                 setTimeout(() => setError(''), 2000);
-                 return;
-            }
-            const gameRef = doc(db, `artifacts/${appId}/public/data/tic-tac-toe-games`, gameId);
-            const newBoard = board.slice();
-            newBoard[index] = currentPlayer;
-            await updateDoc(gameRef, {
-                board: newBoard,
-                isXNext: !isXNext
-            });
-        }
-    };
-    
-    // --- Lógica de la IA ---
-    const aiMove = (currentBoard) => {
-        if (calculateWinner(currentBoard)) return;
-
-        let bestMove = -1;
-
-        // 1. Buscar un movimiento ganador
-        for (let i = 0; i < 9; i++) {
-            if (!currentBoard[i]) {
-                const tempBoard = currentBoard.slice();
-                tempBoard[i] = 'O';
-                if (calculateWinner(tempBoard)?.winner === 'O') {
-                    bestMove = i;
-                    break;
+                const direction = Math.floor(Math.random() * 4);
+                switch (direction) {
+                    case 0: if (x > 1) x--; break;
+                    case 1: if (x < MAP_WIDTH - 2) x++; break;
+                    case 2: if (y > 1) y--; break;
+                    case 3: if (y < MAP_HEIGHT - 2) y++; break;
                 }
             }
-        }
 
-        // 2. Bloquear el movimiento ganador del jugador
-        if (bestMove === -1) {
-            for (let i = 0; i < 9; i++) {
-                if (!currentBoard[i]) {
-                    const tempBoard = currentBoard.slice();
-                    tempBoard[i] = 'X';
-                    if (calculateWinner(tempBoard)?.winner === 'X') {
-                        bestMove = i;
-                        break;
+            const placeObject = (objectType) => {
+                let placed = false;
+                while (!placed) {
+                    let posX = Math.floor(Math.random() * MAP_WIDTH);
+                    let posY = Math.floor(Math.random() * MAP_HEIGHT);
+                    if (map[posX][posY] === 0) {
+                        if (objectType === 'player') {
+                           player = { x: posX, y: posY };
+                        } else if (objectType === 'exit') {
+                           exit = { x: posX, y: posY };
+                        } else if (objectType === 'treasure') {
+                           treasures.push({ x: posX, y: posY });
+                        }
+                        placed = true;
                     }
                 }
+            };
+            
+            placeObject('player');
+            placeObject('exit');
+            treasures = [];
+            for (let i = 0; i < 5; i++) {
+                placeObject('treasure');
             }
         }
-        
-        // 3. Tomar el centro si está libre
-        if (bestMove === -1 && !currentBoard[4]) {
-            bestMove = 4;
-        }
 
-        // 4. Elegir una celda aleatoria si no hay movimientos estratégicos
-        if (bestMove === -1) {
-            const emptyCells = [];
-            currentBoard.forEach((cell, index) => {
-                if (!cell) emptyCells.push(index);
-            });
-            bestMove = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-        }
-        
-        const newBoard = currentBoard.slice();
-        newBoard[bestMove] = 'O';
-        setBoard(newBoard);
-        setIsXNext(true);
-    };
+        // --- Dibujado ---
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // --- Funciones de Multijugador ---
-    const handleCreateGame = async () => {
-        if (!isAuthReady || !db) return;
-        setIsLoading(true);
-        setError('');
-        const newGameId = Math.random().toString(36).substring(2, 8).toUpperCase();
-        const gameRef = doc(db, `artifacts/${appId}/public/data/tic-tac-toe-games`, newGameId);
-        
-        try {
-            await setDoc(gameRef, {
-                board: Array(9).fill(null),
-                isXNext: true,
-                players: { X: userId, O: null },
-                createdAt: serverTimestamp(),
-            });
-            setGameId(newGameId);
-            setPlayerSymbol('X');
-            setGameMode('pvp');
-        } catch (e) {
-            console.error("Error al crear la partida:", e);
-            setError("No se pudo crear la partida. Inténtalo de nuevo.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-    
-    const handleJoinGame = async () => {
-        if (!isAuthReady || !db || !joinGameId) {
-            setError("Por favor, introduce un código de partida.");
-            return;
-        }
-        setIsLoading(true);
-        setError('');
-        const gameRef = doc(db, `artifacts/${appId}/public/data/tic-tac-toe-games`, joinGameId);
-        
-        try {
-            const gameSnap = await getDoc(gameRef);
-            if (!gameSnap.exists()) {
-                setError("Partida no encontrada.");
-                setIsLoading(false);
-                return;
+            for (let x = 0; x < MAP_WIDTH; x++) {
+                for (let y = 0; y < MAP_HEIGHT; y++) {
+                    ctx.fillStyle = map[x][y] === 1 ? '#454545' : '#2a2a2a';
+                    ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                }
             }
             
-            const gameData = gameSnap.data();
-            if (gameData.players.O && gameData.players.O !== userId) {
-                setError("Esta partida ya está llena.");
-                setIsLoading(false);
-                return;
+            // Dibujar salida
+            ctx.fillStyle = '#8e44ad';
+            ctx.fillRect(exit.x * TILE_SIZE, exit.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+
+            // Dibujar tesoros
+            ctx.fillStyle = '#f1c40f';
+            treasures.forEach(t => {
+                ctx.beginPath();
+                ctx.arc(t.x * TILE_SIZE + TILE_SIZE / 2, t.y * TILE_SIZE + TILE_SIZE / 2, TILE_SIZE / 4, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+
+            // Dibujar jugador
+            ctx.fillStyle = '#3498db';
+            ctx.beginPath();
+            ctx.arc(player.x * TILE_SIZE + TILE_SIZE / 2, player.y * TILE_SIZE + TILE_SIZE / 2, TILE_SIZE / 2 - 4, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Actualizar info
+            infoDiv.textContent = `Nivel: ${level} | Tesoro: ${score}`;
+        }
+
+        // --- Controles y Lógica del Juego ---
+        function handleInput(e) {
+            let newX = player.x;
+            let newY = player.y;
+
+            switch (e.key) {
+                case 'ArrowUp': newY--; break;
+                case 'ArrowDown': newY++; break;
+                case 'ArrowLeft': newX--; break;
+                case 'ArrowRight': newX++; break;
+                default: return;
             }
 
-            if(gameData.players.X === userId) {
-                 // El jugador X se está reconectando
-                 setPlayerSymbol('X');
-            } else {
-                // El jugador O se une
-                await updateDoc(gameRef, { 'players.O': userId });
-                setPlayerSymbol('O');
+            // Comprobar colisión con muros
+            if (map[newX] && map[newX][newY] === 0) {
+                player.x = newX;
+                player.y = newY;
+                
+                // Comprobar si hay tesoro
+                const treasureIndex = treasures.findIndex(t => t.x === player.x && t.y === player.y);
+                if (treasureIndex > -1) {
+                    score++;
+                    treasures.splice(treasureIndex, 1);
+                }
+
+                // Comprobar si está en la salida
+                if (player.x === exit.x && player.y === exit.y) {
+                    level++;
+                    generateLevel();
+                }
+                
+                draw();
             }
-
-            setGameId(joinGameId);
-            setGameMode('pvp');
-
-        } catch (e) {
-            console.error("Error al unirse a la partida:", e);
-            setError("No se pudo unir a la partida. Verifica el código.");
-        } finally {
-            setIsLoading(false);
         }
-    };
-    
-    const copyToClipboard = (text) => {
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.select();
-        try {
-            document.execCommand('copy');
-            alert('Código de partida copiado al portapapeles.');
-        } catch (err) {
-            console.error('No se pudo copiar el texto: ', err);
+
+        // --- Integración con Gemini API ---
+        async function generateDescription() {
+            geminiBtn.disabled = true;
+            descriptionBox.innerHTML = '<div class="loader"></div>';
+
+            // Construir un prompt contextual
+            let wallCount = 0;
+            const neighbors = [[0, -1], [0, 1], [-1, 0], [1, 0]];
+            neighbors.forEach(([dx, dy]) => {
+                const nx = player.x + dx;
+                const ny = player.y + dy;
+                if (!map[nx] || map[nx][ny] === 1) {
+                    wallCount++;
+                }
+            });
+
+            let context = "en medio de una sala abierta.";
+            if (wallCount === 1) context = "en una sala grande.";
+            if (wallCount === 2) context = "en un pasillo.";
+            if (wallCount === 3) context = "en un callejón sin salida.";
+            
+            const systemPrompt = "Eres un director de mazmorras de fantasía, narrando un juego roguelike. Sé breve (2-3 frases), atmosférico y misterioso. Describe lo que el jugador ve en la cueva oscura. No te repitas.";
+            const userQuery = `El jugador está ${context} ¿Qué ve?`;
+
+            try {
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Error de API: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                const description = result.candidates[0]?.content?.parts[0]?.text;
+                
+                descriptionBox.textContent = description || "No se pudo obtener una descripción.";
+
+            } catch (error) {
+                console.error("Error al llamar a la API de Gemini:", error);
+                descriptionBox.textContent = "El narrador ancestral guarda silencio por ahora...";
+            } finally {
+                geminiBtn.disabled = false;
+            }
         }
-        document.body.removeChild(textArea);
-    };
 
-    // --- Reseteo y Navegación ---
-    const resetGame = () => {
-        setBoard(Array(9).fill(null));
-        setIsXNext(true);
-        setWinnerInfo(null);
-        setStatus("¡Elige un modo de juego!");
-        setGameId('');
-        setJoinGameId('');
-        setPlayerSymbol(null);
-        setError('');
-    };
-    
-    const backToMenu = () => {
-        resetGame();
-        setGameMode('menu');
-    };
+        // --- Inicio ---
+        window.addEventListener('keydown', handleInput);
+        geminiBtn.addEventListener('click', generateDescription);
+        
+        generateLevel();
+        draw();
+    </script>
+</body>
+</html>
 
-    // --- Renderizado de Componentes ---
-    const renderMenu = () => (
-        <div className="flex flex-col space-y-4">
-            <h1 className="text-5xl font-bold text-white mb-4">Gato Multijugador</h1>
-            <button onClick={() => setGameMode('pva')} className="px-8 py-4 bg-cyan-500 text-white font-semibold rounded-lg shadow-lg hover:bg-cyan-600 transition-colors">
-                Jugar contra IA
-            </button>
-            <button onClick={() => setGameMode('pvp_setup')} className="px-8 py-4 bg-amber-500 text-white font-semibold rounded-lg shadow-lg hover:bg-amber-600 transition-colors">
-                Jugar Multijugador
-            </button>
-            {error && <p className="text-red-400 mt-4">{error}</p>}
-        </div>
-    );
-
-    const renderPvpSetup = () => (
-        <div className="flex flex-col space-y-4 w-full max-w-sm">
-            <h2 className="text-3xl font-bold text-white">Multijugador</h2>
-            <button onClick={handleCreateGame} disabled={isLoading} className="px-6 py-3 bg-emerald-500 text-white font-semibold rounded-lg shadow-lg hover:bg-emerald-600 disabled:bg-gray-500 transition-colors">
-                {isLoading ? 'Creando...' : 'Crear Partida Nueva'}
-            </button>
-            <div className="flex items-center space-x-2">
-                <hr className="w-full border-gray-600" />
-                <span className="text-gray-400 font-bold">O</span>
-                <hr className="w-full border-gray-600" />
-            </div>
-            <input 
-                type="text"
-                placeholder="Código de la partida"
-                value={joinGameId}
-                onChange={(e) => setJoinGameId(e.target.value.toUpperCase())}
-                className="p-3 bg-gray-700 text-white rounded-lg border-2 border-gray-600 focus:outline-none focus:border-amber-500 text-center"
-            />
-            <button onClick={handleJoinGame} disabled={isLoading} className="px-6 py-3 bg-amber-500 text-white font-semibold rounded-lg shadow-lg hover:bg-amber-600 disabled:bg-gray-500 transition-colors">
-                {isLoading ? 'Uniéndose...' : 'Unirse a Partida'}
-            </button>
-            {error && <p className="text-red-400 mt-2 text-center">{error}</p>}
-            <button onClick={backToMenu} className="mt-4 text-gray-400 hover:text-white">
-                Volver al Menú
-            </button>
-        </div>
-    );
-    
-    const renderGame = () => (
-        <div className="flex flex-col items-center">
-             <div className="mb-4 text-center">
-                 <p className="text-2xl text-white font-semibold">{status}</p>
-                 {gameMode === 'pvp' && playerSymbol && (
-                    <p className="text-lg text-gray-400">Juegas como: <span className={`font-bold ${playerSymbol === 'X' ? 'text-cyan-400' : 'text-amber-400'}`}>{playerSymbol}</span></p>
-                 )}
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-                {board.map((cell, i) => (
-                    <Cell 
-                        key={i} 
-                        value={cell} 
-                        onClick={() => handleCellClick(i)} 
-                        isWinning={winnerInfo?.line.includes(i)}
-                    />
-                ))}
-            </div>
-             {gameMode === 'pvp' && gameId && (
-                <div className="mt-4 p-3 bg-gray-800 rounded-lg text-center">
-                    <p className="text-gray-400">Código de partida:</p>
-                    <div className="flex items-center space-x-2">
-                        <p className="text-xl font-bold text-white tracking-widest">{gameId}</p>
-                        <button onClick={() => copyToClipboard(gameId)} className="p-2 rounded-md bg-gray-700 hover:bg-gray-600 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            )}
-            {error && <p className="text-red-400 mt-4 text-center">{error}</p>}
-            <div className="flex space-x-4 mt-6">
-                <button onClick={resetGame} className="px-6 py-2 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 transition-colors">
-                    {winnerInfo ? 'Jugar de Nuevo' : 'Reiniciar'}
-                </button>
-                <button onClick={backToMenu} className="px-6 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors">
-                    Salir al Menú
-                </button>
-            </div>
-        </div>
-    );
-    
-    const renderContent = () => {
-        switch (gameMode) {
-            case 'pva':
-            case 'pvp':
-                return renderGame();
-            case 'pvp_setup':
-                return renderPvpSetup();
-            case 'menu':
-            default:
-                return renderMenu();
-        }
-    };
-
-    return (
-        <div className="bg-gray-900 min-h-screen text-white flex flex-col items-center justify-center p-4 font-sans">
-            <div className="w-full max-w-md mx-auto flex flex-col items-center">
-                {isAuthReady ? renderContent() : <p className="text-2xl">Conectando al servicio...</p>}
-            </div>
-             <footer className="absolute bottom-4 text-gray-500 text-sm">
-                Tu ID de jugador: <span className="font-mono text-gray-400">{userId || "Cargando..."}</span>
-            </footer>
-        </div>
-    );
-}
