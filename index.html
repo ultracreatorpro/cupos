@@ -1,684 +1,435 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Stickerslandia — Creador de Packs de Stickers</title>
-  <!-- Fuentes Google -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Roboto:wght@300;400;700&family=Indie+Flower&display=swap" rel="stylesheet">
-  <!-- Librerías utilitarias (NO frameworks) -->
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-  <style>
-    :root{
-      --primary:#FF6B6B;  /* coral */
-      --accent:#4ECDC4;   /* menta */
-      --ink:#1A535C;      /* azul oscuro */
-      --bg:#F7FAFC;       /* gris muy claro */
-      --muted:#96A6A6;    /* gris medio */
-      --radius:18px;
-      --shadow:0 8px 24px rgba(0,0,0,.08);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; background:var(--bg); color:#0f172a;
-      font-family: Poppins, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
-    }
-    header{
-      position:sticky; top:0; z-index:10;
-      background:linear-gradient(135deg,var(--primary),var(--accent));
-      color:#fff; padding:16px 20px; box-shadow:var(--shadow);
-      display:flex; align-items:center; justify-content:space-between;
-    }
-    header .brand{display:flex; gap:12px; align-items:center}
-    .logo{
-      width:40px; height:40px; border-radius:12px; background:#fff; color:var(--ink);
-      display:grid; place-items:center; font-weight:800;
-      box-shadow:inset 0 0 0 2px rgba(0,0,0,.05);
-    }
-    .brand h1{font-size:18px; margin:0; line-height:1}
-    .brand small{display:block; opacity:.9; font-weight:400}
-    .toolbar{
-      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-    }
-    .btn{
-      border:none; background:var(--ink); color:#fff; padding:10px 14px;
-      border-radius:12px; cursor:pointer; font-weight:600; box-shadow:var(--shadow);
-      transition:transform .06s ease, filter .2s ease; 
-    }
-    .btn:active{ transform:scale(.98)}
-    .btn.secondary{ background:#fff; color:var(--ink); border:1px solid #e2e8f0 }
-    .btn.success{ background:var(--accent); color:#08373C }
-    .btn.warn{ background:var(--primary) }
-    .icon{font-style:normal}
+import React, { useState, useEffect, useCallback } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { 
+    getFirestore, 
+    doc, 
+    setDoc, 
+    onSnapshot, 
+    getDoc,
+    updateDoc,
+    serverTimestamp
+} from 'firebase/firestore';
 
-    main{
-      display:grid; grid-template-columns: 330px 1fr 360px; gap:16px; padding:16px; max-width:1400px; margin:0 auto;
-    }
-    @media (max-width:1100px){ main{grid-template-columns:1fr; padding-bottom:100px} }
+// --- Configuración de Firebase ---
+// Las variables __app_id, __firebase_config y __initial_auth_token
+// son proporcionadas por el entorno de ejecución.
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
 
-    .panel{
-      background:#fff; border-radius:var(--radius); box-shadow:var(--shadow);
-      padding:14px; overflow:hidden;
-    }
-    .panel h2{font-size:16px; margin:0 0 10px; color:var(--ink)}
-    .panel .section{border-top:1px dashed #e2e8f0; padding-top:12px; margin-top:12px}
+// --- Componente de Celda del Tablero ---
+const Cell = ({ value, onClick, isWinning }) => (
+    <button
+        onClick={onClick}
+        className={`w-24 h-24 md:w-32 md:h-32 bg-gray-800 rounded-lg flex items-center justify-center text-6xl font-bold transition-all duration-200 ease-in-out
+        ${isWinning ? 'bg-emerald-500 text-white' : 'text-gray-400 hover:bg-gray-700'}
+        ${value === 'X' ? 'text-cyan-400' : 'text-amber-400'}`}
+        disabled={!!value}
+    >
+        {value}
+    </button>
+);
 
-    .controls label{display:block; font-size:12px; color:#334155; margin:8px 0 6px}
-    .controls input[type="text"],
-    .controls input[type="number"],
-    .controls input[type="color"],
-    .controls select, .controls textarea{
-      width:100%; padding:10px 12px; border:1px solid #e2e8f0; border-radius:12px; background:#fff;
-      font-family:inherit; font-size:14px;
-    }
-    .controls .row{display:grid; grid-template-columns:1fr 1fr; gap:8px}
-    .controls .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px}
+// --- Componente Principal de la App ---
+export default function App() {
+    // --- Estados del Componente ---
+    const [gameMode, setGameMode] = useState('menu'); // 'menu', 'pva', 'pvp_setup', 'pvp'
+    const [board, setBoard] = useState(Array(9).fill(null));
+    const [isXNext, setIsXNext] = useState(true);
+    const [winnerInfo, setWinnerInfo] = useState(null); // { winner: 'X'/'O'/'draw', line: [...] }
+    const [status, setStatus] = useState("¡Elige un modo de juego!");
 
-    .editor{
-      display:grid; grid-template-rows:auto 1fr auto; gap:12px; height:calc(100vh - 120px);
-    }
-    @media (max-width:1100px){ .editor{height:auto} }
+    // Estados de Firebase y Multijugador
+    const [db, setDb] = useState(null);
+    const [auth, setAuth] = useState(null);
+    const [userId, setUserId] = useState(null);
+    const [isAuthReady, setIsAuthReady] = useState(false);
+    const [gameId, setGameId] = useState('');
+    const [joinGameId, setJoinGameId] = useState('');
+    const [playerSymbol, setPlayerSymbol] = useState(null); // 'X' o 'O' en modo pvp
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+    
+    // --- Inicialización de Firebase ---
+    useEffect(() => {
+        try {
+            const app = initializeApp(firebaseConfig);
+            const firestoreDb = getFirestore(app);
+            const firebaseAuth = getAuth(app);
+            setDb(firestoreDb);
+            setAuth(firebaseAuth);
 
-    .canvas-wrap{position:relative; display:grid; place-items:center; background:#f1f5f9; border-radius:16px; min-height:420px; overflow:auto}
-    canvas#editorCanvas{ background:transparent; border-radius:16px; box-shadow:inset 0 0 0 1px #e2e8f0; }
-    .overlay-layer{ position:absolute; inset:10px; pointer-events:none }
-    .layer-item{ position:absolute; transform-origin:center; pointer-events:auto; cursor:move }
-    .layer-item[data-selected="true"]{ outline:2px dashed var(--primary); border-radius:8px }
-    .handle{ position:absolute; width:12px; height:12px; border-radius:50%; background:var(--primary); right:-6px; bottom:-6px; cursor:nwse-resize }
+            onAuthStateChanged(firebaseAuth, async (user) => {
+                if (user) {
+                    setUserId(user.uid);
+                } else {
+                    await signInAnonymously(firebaseAuth);
+                }
+                setIsAuthReady(true);
+            });
+        } catch (e) {
+            console.error("Error al inicializar Firebase:", e);
+            setError("No se pudo conectar a los servicios del juego.");
+        }
+    }, []);
 
-    .thumbs{ display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:10px }
-    .thumb{ background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:6px; text-align:center; }
-    .thumb img{ max-width:100%; border-radius:8px }
+    // --- Lógica del Juego ---
+    const calculateWinner = useCallback((squares) => {
+        const lines = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Filas
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columnas
+            [0, 4, 8], [2, 4, 6]             // Diagonales
+        ];
+        for (let i = 0; i < lines.length; i++) {
+            const [a, b, c] = lines[i];
+            if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+                return { winner: squares[a], line: lines[i] };
+            }
+        }
+        if (squares.every(Boolean)) {
+            return { winner: 'draw', line: [] };
+        }
+        return null;
+    }, []);
+    
+    // --- Actualización de Estado y Turno de la IA ---
+    useEffect(() => {
+        const newWinnerInfo = calculateWinner(board);
+        if (newWinnerInfo) {
+            setWinnerInfo(newWinnerInfo);
+            if (newWinnerInfo.winner === 'draw') {
+                setStatus('¡Es un empate!');
+            } else {
+                setStatus(`¡El ganador es ${newWinnerInfo.winner}!`);
+            }
+        } else {
+            const currentPlayer = isXNext ? 'X' : 'O';
+            setStatus(`Turno de ${currentPlayer}`);
 
-    .tabs{ display:flex; gap:8px; border-bottom:1px solid #e2e8f0; margin-bottom:10px; flex-wrap:wrap }
-    .tab{ padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:600; }
-    .tab.active{ background:var(--ink); color:#fff }
+            // Turno de la IA
+            if (gameMode === 'pva' && !isXNext && !newWinnerInfo) {
+                const timer = setTimeout(() => {
+                    aiMove(board);
+                }, 500);
+                return () => clearTimeout(timer);
+            }
+        }
+    }, [board, isXNext, gameMode, calculateWinner]);
 
-    .pack-card{ display:grid; grid-template-columns:60px 1fr auto; gap:10px; align-items:center; border:1px solid #e2e8f0; border-radius:14px; padding:10px; }
-    .pack-card img{ width:60px; height:60px; object-fit:cover; border-radius:12px; background:#f1f5f9 }
-    .pack-card .meta b{ display:block }
-    .pill{ display:inline-block; padding:4px 8px; border-radius:999px; font-size:12px; background:#ecfeff; color:#134e4a; border:1px solid #cffafe }
+    // --- Listener de Firestore para Partidas PVP ---
+    useEffect(() => {
+        if (gameMode !== 'pvp' || !gameId || !db) return;
 
-    .notice{ background:#fff7ed; border:1px solid #fed7aa; color:#7c2d12; padding:10px 12px; border-radius:12px; }
-    .muted{ color:#64748b; font-size:12px }
-    footer{ text-align:center; padding:18px; color:#475569 }
+        const gameRef = doc(db, `artifacts/${appId}/public/data/tic-tac-toe-games`, gameId);
+        const unsubscribe = onSnapshot(gameRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const gameData = docSnap.data();
+                setBoard(gameData.board);
+                setIsXNext(gameData.isXNext);
+                
+                // Asignar rol si aún no está asignado
+                if (userId && !gameData.players.O && gameData.players.X !== userId) {
+                    setPlayerSymbol('O');
+                } else if (userId && gameData.players.X === userId) {
+                    setPlayerSymbol('X');
+                }
+            } else {
+                setError("La partida ya no existe.");
+                resetGame();
+            }
+        });
 
-    /* Animaciones suaves */
-    .fade-in{ animation:fade .25s ease-out }
-    @keyframes fade{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
-  </style>
-</head>
-<body>
-  <header>
-    <div class="brand">
-      <div class="logo">🧩</div>
-      <div>
-        <h1>Stickerslandia</h1>
-        <small>Crea, edita, comparte y exporta packs</small>
-      </div>
-    </div>
-    <div class="toolbar">
-      <button class="btn secondary" id="btnNew">Nuevo lienzo</button>
-      <button class="btn" id="btnAddToPack">Añadir al pack</button>
-      <button class="btn success" id="btnExportSticker">Exportar sticker</button>
-    </div>
-  </header>
+        return () => unsubscribe();
+    }, [gameMode, gameId, db, userId, appId]);
 
-  <main>
-    <!-- PANEL IZQUIERDO: CONTROLES -->
-    <aside class="panel controls">
-      <h2>🖼️ Imagen base</h2>
-      <label>Subir imagen (galería/cámara)</label>
-      <input type="file" accept="image/*" capture="environment" id="fileInput" />
-      <div class="row section">
-        <button class="btn secondary" id="btnCropMode">Recortar</button>
-        <button class="btn" id="btnApplyCrop">Aplicar recorte</button>
-      </div>
-      <div class="section">
-        <label>Eliminar fondo (opcional)</label>
-        <input type="text" id="removeBgKey" placeholder="API key remove.bg (opcional)"/>
-        <div class="row">
-          <button class="btn" id="btnRemoveBg">Quitar fondo</button>
-          <button class="btn secondary" id="btnClearBg">Restaurar</button>
-        </div>
-        <p class="muted">Nota: requiere <a href="https://www.remove.bg/api" target="_blank">API de remove.bg</a>.</p>
-      </div>
+    // --- Manejador de Clics en Celdas ---
+    const handleCellClick = async (index) => {
+        if (winnerInfo || board[index]) return;
+        
+        const currentPlayer = isXNext ? 'X' : 'O';
 
-      <div class="section">
-        <h2>✍️ Texto</h2>
-        <label>Contenido</label>
-        <input type="text" id="textInput" placeholder="Escribe tu texto" />
-        <div class="row">
-          <label>Fuente<select id="fontSelect">
-            <option value="Poppins">Poppins</option>
-            <option value="Roboto">Roboto</option>
-            <option value="Indie Flower">Indie Flower</option>
-          </select></label>
-          <label>Tamaño (px)<input id="fontSize" type="number" value="48" min="8" max="200"/></label>
-        </div>
-        <div class="row">
-          <label>Color <input id="fontColor" type="color" value="#000000"/></label>
-          <label>Contorno <input id="strokeColor" type="color" value="#ffffff"/></label>
-        </div>
-        <button class="btn" id="btnAddText">Agregar texto</button>
-      </div>
-
-      <div class="section">
-        <h2>🎨 Elementos</h2>
-        <div class="row">
-          <label>Emoji<br><input type="text" id="emojiInput" placeholder="😀😎🔥"/></label>
-          <button class="btn" id="btnAddEmoji" style="align-self:end">Agregar</button>
-        </div>
-        <label>Stickers decorativos</label>
-        <div class="row3">
-          <button class="btn secondary deco" data-svg="star">⭐</button>
-          <button class="btn secondary deco" data-svg="heart">❤️</button>
-          <button class="btn secondary deco" data-svg="boom">💥</button>
-        </div>
-      </div>
-
-      <div class="section">
-        <h2>🛠️ Transformar</h2>
-        <label>Escala <input type="range" id="scaleRange" min="0.2" max="3" step="0.01" value="1"></label>
-        <label>Rotación (°) <input type="range" id="rotateRange" min="-180" max="180" step="1" value="0"></label>
-        <button class="btn secondary" id="btnDeleteLayer">Eliminar seleccionado</button>
-      </div>
-
-      <div class="section">
-        <h2>🧪 Filtros</h2>
-        <label>Brillo <input type="range" id="fBrightness" min="0" max="2" value="1" step="0.01"></label>
-        <label>Contraste <input type="range" id="fContrast" min="0" max="2" value="1" step="0.01"></label>
-        <label>Saturación <input type="range" id="fSaturate" min="0" max="2" value="1" step="0.01"></label>
-        <label>Sepia <input type="range" id="fSepia" min="0" max="1" value="0" step="0.01"></label>
-        <button class="btn secondary" id="btnResetFilters">Reset filtros</button>
-      </div>
-    </aside>
-
-    <!-- EDITOR CENTRAL -->
-    <section class="panel editor">
-      <div class="tabs">
-        <div class="tab active" data-tab="editor">Editor</div>
-        <div class="tab" data-tab="pack">Mi Pack</div>
-      </div>
-      <div id="editorTab">
-        <div class="canvas-wrap">
-          <canvas id="editorCanvas" width="512" height="512"></canvas>
-          <div id="overlay" class="overlay-layer"></div>
-        </div>
-        <div class="section" style="display:flex; gap:8px; flex-wrap:wrap">
-          <button class="btn" id="btnFitCanvas">Ajustar al centro</button>
-          <button class="btn secondary" id="btnClearAll">Limpiar todo</button>
-        </div>
-      </div>
-      <div id="packTab" style="display:none">
-        <div class="section">
-          <h2>📦 Datos del Pack</h2>
-          <div class="row">
-            <label>Nombre<input id="packName" type="text" placeholder="Mi super pack"/></label>
-            <label>Descripción<input id="packDesc" type="text" placeholder="Memes, reacciones, etc."/></label>
-          </div>
-          <div class="row">
-            <label>Autor<input id="packAuthor" type="text" placeholder="Tu nombre"/></label>
-            <label>Público
-              <select id="packPublic"><option value="no">No</option><option value="si">Sí</option></select>
-            </label>
-          </div>
-          <div style="display:flex; gap:8px; margin-top:8px">
-            <button class="btn" id="btnSavePack">Guardar Pack</button>
-            <button class="btn success" id="btnExportPack">Exportar ZIP</button>
-            <button class="btn secondary" id="btnAddToWhatsApp">Agregar a WhatsApp</button>
-          </div>
-          <p class="muted">Consejo: añade 3–30 stickers por pack. Se exportan en PNG/WebP 512×512.</p>
-        </div>
-        <div class="section">
-          <h2>🖼️ Stickers del pack actual</h2>
-          <div id="currentPackGrid" class="thumbs"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- PANEL DERECHO: MIS PACKS / COMUNIDAD -->
-    <aside class="panel">
-      <div class="tabs">
-        <div class="tab active" data-tab="mypacks">Mis packs</div>
-        <div class="tab" data-tab="community">Comunidad</div>
-      </div>
-      <div id="mypacksTab">
-        <div id="myPacksList" class="stack"></div>
-      </div>
-      <div id="communityTab" style="display:none">
-        <div class="notice" style="margin-bottom:10px">
-          <b>Packs públicos</b> subidos desde tu navegador. Para ver creaciones de otras personas se requiere un backend o sincronización externa.
-        </div>
-        <div id="communityList" class="stack"></div>
-      </div>
-    </aside>
-  </main>
-
-  <footer>
-    Hecho con ❤️ en Stickerslandia • Compatible con navegadores modernos • <span class="muted">Demo educativa (sin servidor)</span>
-  </footer>
-
-  <script>
-  // =============================================================
-  // Stickerslandia — Lógica principal (vanilla JS)
-  // =============================================================
-  // Objetivo: permitir crear stickers (512x512), editar capas (texto/emoji/decoración),
-  // aplicar recorte/filtros, guardar en pack, exportar a ZIP, y simular comunidad via LocalStorage.
-
-  // -------------------- Estado global --------------------
-  const canvas = document.getElementById('editorCanvas');
-  const ctx = canvas.getContext('2d');
-  const overlay = document.getElementById('overlay'); // capa DOM para elementos interactivos
-
-  const state = {
-    baseImage: null,              // HTMLImageElement con la imagen cargada (posiblemente recortada)
-    baseImageOriginal: null,      // copia para restaurar
-    cropMode: false,
-    cropRect: null,               // {x,y,w,h}
-    filters: { brightness:1, contrast:1, saturate:1, sepia:0 },
-    layers: [],                   // elementos DOM (.layer-item) con dataset tipo y props
-    selectedLayer: null,
-    pack: { name:'', desc:'', author:'', public:false, items:[] }, // items: dataURL
-  };
-
-  // Helpers UI
-  const $ = sel => document.querySelector(sel);
-  const $$ = sel => Array.from(document.querySelectorAll(sel));
-
-  // -------------------- Tabs --------------------
-  $$('.tab').forEach(t=>t.addEventListener('click', ()=>{
-    const group = t.dataset.tab;
-    // activar pestaña
-    $$('.tab').forEach(x=>x.classList.remove('active'));
-    t.classList.add('active');
-    // mostrar panel correspondiente
-    if(['editor','pack'].includes(group)){
-      $('#editorTab').style.display = group==='editor'? 'block':'none';
-      $('#packTab').style.display = group==='pack'? 'block':'none';
-    } else if(['mypacks','community'].includes(group)){
-      $('#mypacksTab').style.display = group==='mypacks'? 'block':'none';
-      $('#communityTab').style.display = group==='community'? 'block':'none';
-    }
-  }));
-
-  // -------------------- Carga de imagen --------------------
-  $('#fileInput').addEventListener('change', async (e)=>{
-    const file = e.target.files[0]; if(!file) return;
-    const img = new Image();
-    img.onload = ()=>{
-      state.baseImage = img; state.baseImageOriginal = img.cloneNode(false);
-      fitToCanvas(); render();
+        if (gameMode === 'pva') {
+            if (!isXNext) return; // No permitir clic si es turno de la IA
+            const newBoard = board.slice();
+            newBoard[index] = 'X';
+            setBoard(newBoard);
+            setIsXNext(false);
+        } else if (gameMode === 'pvp') {
+            if (playerSymbol !== currentPlayer) {
+                 setError("No es tu turno.");
+                 setTimeout(() => setError(''), 2000);
+                 return;
+            }
+            const gameRef = doc(db, `artifacts/${appId}/public/data/tic-tac-toe-games`, gameId);
+            const newBoard = board.slice();
+            newBoard[index] = currentPlayer;
+            await updateDoc(gameRef, {
+                board: newBoard,
+                isXNext: !isXNext
+            });
+        }
     };
-    img.src = URL.createObjectURL(file);
-  });
+    
+    // --- Lógica de la IA ---
+    const aiMove = (currentBoard) => {
+        if (calculateWinner(currentBoard)) return;
 
-  function fitToCanvas(){
-    // centra la imagen dentro del canvas 512x512 conservando aspecto (auto letterbox)
-    if(!state.baseImage) { clearCanvas(); return; }
-    clearCanvas();
-    const iw = state.baseImage.naturalWidth, ih = state.baseImage.naturalHeight;
-    const scale = Math.min(canvas.width/iw, canvas.height/ih);
-    const w = iw*scale, h = ih*scale;
-    const x = (canvas.width - w)/2, y = (canvas.height - h)/2;
-    ctx.drawImage(state.baseImage, x, y, w, h);
-    applyFilters();
-  }
+        let bestMove = -1;
 
-  function clearCanvas(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.save(); ctx.fillStyle='rgba(0,0,0,0)'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.restore();
-  }
+        // 1. Buscar un movimiento ganador
+        for (let i = 0; i < 9; i++) {
+            if (!currentBoard[i]) {
+                const tempBoard = currentBoard.slice();
+                tempBoard[i] = 'O';
+                if (calculateWinner(tempBoard)?.winner === 'O') {
+                    bestMove = i;
+                    break;
+                }
+            }
+        }
 
-  // -------------------- Recorte --------------------
-  let dragStart = null;
-  $('#btnCropMode').addEventListener('click', ()=>{
-    state.cropMode = !state.cropMode; state.cropRect = null;
-    $('#btnCropMode').classList.toggle('warn', state.cropMode);
-  });
-  canvas.addEventListener('mousedown', (e)=>{
-    if(!state.cropMode) return; dragStart = getCanvasPos(e); state.cropRect = {x:dragStart.x, y:dragStart.y, w:0, h:0};
-    render();
-  });
-  canvas.addEventListener('mousemove', (e)=>{
-    if(!state.cropMode || !state.cropRect || !dragStart) return;
-    const p = getCanvasPos(e); state.cropRect.w = p.x - dragStart.x; state.cropRect.h = p.y - dragStart.y; render();
-  });
-  window.addEventListener('mouseup', ()=>{ dragStart=null; });
-  $('#btnApplyCrop').addEventListener('click', ()=>{
-    if(!state.baseImage || !state.cropRect) return;
-    // Normaliza rect
-    let {x,y,w,h} = state.cropRect; if(w<0){x+=w; w*=-1} if(h<0){y+=h; h*=-1}
-    // Extrae del lienzo actual
-    const imageData = ctx.getImageData(x,y,w,h);
-    // pinta en canvas completo centrado
-    clearCanvas();
-    const scale = Math.min(canvas.width/w, canvas.height/h);
-    const dw = w*scale, dh = h*scale;
-    const dx = (canvas.width-dw)/2, dy=(canvas.height-dh)/2;
-    const temp = document.createElement('canvas'); temp.width=w; temp.height=h; temp.getContext('2d').putImageData(imageData,0,0);
-    ctx.drawImage(temp, dx, dy, dw, dh);
-    state.cropMode=false; state.cropRect=null; $('#btnCropMode').classList.remove('warn');
-  });
+        // 2. Bloquear el movimiento ganador del jugador
+        if (bestMove === -1) {
+            for (let i = 0; i < 9; i++) {
+                if (!currentBoard[i]) {
+                    const tempBoard = currentBoard.slice();
+                    tempBoard[i] = 'X';
+                    if (calculateWinner(tempBoard)?.winner === 'X') {
+                        bestMove = i;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // 3. Tomar el centro si está libre
+        if (bestMove === -1 && !currentBoard[4]) {
+            bestMove = 4;
+        }
 
-  function getCanvasPos(e){
-    const rect = canvas.getBoundingClientRect();
-    return { x: Math.round((e.clientX-rect.left)*canvas.width/rect.width), y: Math.round((e.clientY-rect.top)*canvas.height/rect.height) };
-  }
+        // 4. Elegir una celda aleatoria si no hay movimientos estratégicos
+        if (bestMove === -1) {
+            const emptyCells = [];
+            currentBoard.forEach((cell, index) => {
+                if (!cell) emptyCells.push(index);
+            });
+            bestMove = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+        }
+        
+        const newBoard = currentBoard.slice();
+        newBoard[bestMove] = 'O';
+        setBoard(newBoard);
+        setIsXNext(true);
+    };
 
-  // -------------------- Filtros básicos --------------------
-  ['fBrightness','fContrast','fSaturate','fSepia'].forEach(id=>{
-    document.getElementById(id).addEventListener('input', ()=>{
-      state.filters = {
-        brightness: parseFloat($('#fBrightness').value),
-        contrast: parseFloat($('#fContrast').value),
-        saturate: parseFloat($('#fSaturate').value),
-        sepia: parseFloat($('#fSepia').value),
-      };
-      render();
-    })
-  });
-  $('#btnResetFilters').addEventListener('click', ()=>{
-    $('#fBrightness').value=1; $('#fContrast').value=1; $('#fSaturate').value=1; $('#fSepia').value=0;
-    state.filters={brightness:1,contrast:1,saturate:1,sepia:0}; render();
-  });
+    // --- Funciones de Multijugador ---
+    const handleCreateGame = async () => {
+        if (!isAuthReady || !db) return;
+        setIsLoading(true);
+        setError('');
+        const newGameId = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const gameRef = doc(db, `artifacts/${appId}/public/data/tic-tac-toe-games`, newGameId);
+        
+        try {
+            await setDoc(gameRef, {
+                board: Array(9).fill(null),
+                isXNext: true,
+                players: { X: userId, O: null },
+                createdAt: serverTimestamp(),
+            });
+            setGameId(newGameId);
+            setPlayerSymbol('X');
+            setGameMode('pvp');
+        } catch (e) {
+            console.error("Error al crear la partida:", e);
+            setError("No se pudo crear la partida. Inténtalo de nuevo.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    const handleJoinGame = async () => {
+        if (!isAuthReady || !db || !joinGameId) {
+            setError("Por favor, introduce un código de partida.");
+            return;
+        }
+        setIsLoading(true);
+        setError('');
+        const gameRef = doc(db, `artifacts/${appId}/public/data/tic-tac-toe-games`, joinGameId);
+        
+        try {
+            const gameSnap = await getDoc(gameRef);
+            if (!gameSnap.exists()) {
+                setError("Partida no encontrada.");
+                setIsLoading(false);
+                return;
+            }
+            
+            const gameData = gameSnap.data();
+            if (gameData.players.O && gameData.players.O !== userId) {
+                setError("Esta partida ya está llena.");
+                setIsLoading(false);
+                return;
+            }
 
-  function applyFilters(){
-    // Re-render base con filtros CSS vía canvas: redibujamos usando offscreen con ctx.filter
-    if(!state.baseImage) return;
-    const iw = canvas.width, ih = canvas.height;
-    const tmp = document.createElement('canvas'); tmp.width=iw; tmp.height=ih; const tctx=tmp.getContext('2d');
-    const f = state.filters; tctx.filter=`brightness(${f.brightness}) contrast(${f.contrast}) saturate(${f.saturate}) sepia(${f.sepia})`;
-    // copiar del canvas actual (ya contiene la imagen ajustada)
-    tctx.drawImage(canvas,0,0);
-    clearCanvas();
-    ctx.drawImage(tmp,0,0);
-  }
+            if(gameData.players.X === userId) {
+                 // El jugador X se está reconectando
+                 setPlayerSymbol('X');
+            } else {
+                // El jugador O se une
+                await updateDoc(gameRef, { 'players.O': userId });
+                setPlayerSymbol('O');
+            }
 
-  // -------------------- Eliminar fondo (remove.bg) --------------------
-  $('#btnRemoveBg').addEventListener('click', async ()=>{
-    const key = $('#removeBgKey').value.trim(); if(!key) { alert('Ingresa tu API key de remove.bg para usar esta función.'); return; }
-    // Exporta PNG actual, envía a remove.bg, recibe PNG con alpha y lo vuelve a dibujar.
-    const blob = await new Promise(res=>canvas.toBlob(res,'image/png'));
-    const form = new FormData(); form.append('image_file', blob, 'sticker.png'); form.append('size','auto');
-    const r = await fetch('https://api.remove.bg/v1.0/removebg', { method:'POST', headers:{'X-Api-Key':key}, body:form });
-    if(!r.ok){ alert('Error al quitar fondo: '+r.statusText); return; }
-    const outBlob = await r.blob(); const url = URL.createObjectURL(outBlob);
-    const img = new Image(); img.onload = ()=>{ state.baseImage = img; fitToCanvas(); URL.revokeObjectURL(url); };
-    img.src = url;
-  });
-  $('#btnClearBg').addEventListener('click', ()=>{ if(state.baseImageOriginal){ state.baseImage = state.baseImageOriginal; fitToCanvas(); }});
+            setGameId(joinGameId);
+            setGameMode('pvp');
 
-  // -------------------- Capas DOM: Texto / Emoji / Decoración --------------------
-  function createLayerElement(){
-    const el = document.createElement('div'); el.className='layer-item'; el.dataset.scale='1'; el.dataset.rotate='0'; el.style.left='50%'; el.style.top='50%'; el.style.transform='translate(-50%,-50%)';
-    const handle = document.createElement('div'); handle.className='handle'; el.appendChild(handle);
-    overlay.appendChild(el); makeDraggable(el); makeResizable(el, handle); return el;
-  }
+        } catch (e) {
+            console.error("Error al unirse a la partida:", e);
+            setError("No se pudo unir a la partida. Verifica el código.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    const copyToClipboard = (text) => {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            alert('Código de partida copiado al portapapeles.');
+        } catch (err) {
+            console.error('No se pudo copiar el texto: ', err);
+        }
+        document.body.removeChild(textArea);
+    };
 
-  function selectLayer(el){
-    if(state.selectedLayer) state.selectedLayer.dataset.selected='false';
-    state.selectedLayer = el; if(el) { el.dataset.selected='true'; $('#scaleRange').value=el.dataset.scale||1; $('#rotateRange').value=el.dataset.rotate||0; }
-  }
+    // --- Reseteo y Navegación ---
+    const resetGame = () => {
+        setBoard(Array(9).fill(null));
+        setIsXNext(true);
+        setWinnerInfo(null);
+        setStatus("¡Elige un modo de juego!");
+        setGameId('');
+        setJoinGameId('');
+        setPlayerSymbol(null);
+        setError('');
+    };
+    
+    const backToMenu = () => {
+        resetGame();
+        setGameMode('menu');
+    };
 
-  $('#btnDeleteLayer').addEventListener('click', ()=>{ if(state.selectedLayer){ state.selectedLayer.remove(); state.selectedLayer=null; }});
+    // --- Renderizado de Componentes ---
+    const renderMenu = () => (
+        <div className="flex flex-col space-y-4">
+            <h1 className="text-5xl font-bold text-white mb-4">Gato Multijugador</h1>
+            <button onClick={() => setGameMode('pva')} className="px-8 py-4 bg-cyan-500 text-white font-semibold rounded-lg shadow-lg hover:bg-cyan-600 transition-colors">
+                Jugar contra IA
+            </button>
+            <button onClick={() => setGameMode('pvp_setup')} className="px-8 py-4 bg-amber-500 text-white font-semibold rounded-lg shadow-lg hover:bg-amber-600 transition-colors">
+                Jugar Multijugador
+            </button>
+            {error && <p className="text-red-400 mt-4">{error}</p>}
+        </div>
+    );
 
-  // Texto
-  $('#btnAddText').addEventListener('click', ()=>{
-    const text = $('#textInput').value.trim(); if(!text) return;
-    const font = $('#fontSelect').value; const size = parseInt($('#fontSize').value)||48; const color=$('#fontColor').value; const stroke=$('#strokeColor').value;
-    const el = createLayerElement(); el.dataset.type='text'; el.dataset.font=font; el.dataset.size=size; el.dataset.color=color; el.dataset.stroke=stroke;
-    el.innerHTML = `<div style="font-family:${font}; font-size:${size}px; color:${color}; -webkit-text-stroke:2px ${stroke}; white-space:pre;">${escapeHtml(text)}</div>`;
-    selectLayer(el);
-  });
+    const renderPvpSetup = () => (
+        <div className="flex flex-col space-y-4 w-full max-w-sm">
+            <h2 className="text-3xl font-bold text-white">Multijugador</h2>
+            <button onClick={handleCreateGame} disabled={isLoading} className="px-6 py-3 bg-emerald-500 text-white font-semibold rounded-lg shadow-lg hover:bg-emerald-600 disabled:bg-gray-500 transition-colors">
+                {isLoading ? 'Creando...' : 'Crear Partida Nueva'}
+            </button>
+            <div className="flex items-center space-x-2">
+                <hr className="w-full border-gray-600" />
+                <span className="text-gray-400 font-bold">O</span>
+                <hr className="w-full border-gray-600" />
+            </div>
+            <input 
+                type="text"
+                placeholder="Código de la partida"
+                value={joinGameId}
+                onChange={(e) => setJoinGameId(e.target.value.toUpperCase())}
+                className="p-3 bg-gray-700 text-white rounded-lg border-2 border-gray-600 focus:outline-none focus:border-amber-500 text-center"
+            />
+            <button onClick={handleJoinGame} disabled={isLoading} className="px-6 py-3 bg-amber-500 text-white font-semibold rounded-lg shadow-lg hover:bg-amber-600 disabled:bg-gray-500 transition-colors">
+                {isLoading ? 'Uniéndose...' : 'Unirse a Partida'}
+            </button>
+            {error && <p className="text-red-400 mt-2 text-center">{error}</p>}
+            <button onClick={backToMenu} className="mt-4 text-gray-400 hover:text-white">
+                Volver al Menú
+            </button>
+        </div>
+    );
+    
+    const renderGame = () => (
+        <div className="flex flex-col items-center">
+             <div className="mb-4 text-center">
+                 <p className="text-2xl text-white font-semibold">{status}</p>
+                 {gameMode === 'pvp' && playerSymbol && (
+                    <p className="text-lg text-gray-400">Juegas como: <span className={`font-bold ${playerSymbol === 'X' ? 'text-cyan-400' : 'text-amber-400'}`}>{playerSymbol}</span></p>
+                 )}
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+                {board.map((cell, i) => (
+                    <Cell 
+                        key={i} 
+                        value={cell} 
+                        onClick={() => handleCellClick(i)} 
+                        isWinning={winnerInfo?.line.includes(i)}
+                    />
+                ))}
+            </div>
+             {gameMode === 'pvp' && gameId && (
+                <div className="mt-4 p-3 bg-gray-800 rounded-lg text-center">
+                    <p className="text-gray-400">Código de partida:</p>
+                    <div className="flex items-center space-x-2">
+                        <p className="text-xl font-bold text-white tracking-widest">{gameId}</p>
+                        <button onClick={() => copyToClipboard(gameId)} className="p-2 rounded-md bg-gray-700 hover:bg-gray-600 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            )}
+            {error && <p className="text-red-400 mt-4 text-center">{error}</p>}
+            <div className="flex space-x-4 mt-6">
+                <button onClick={resetGame} className="px-6 py-2 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 transition-colors">
+                    {winnerInfo ? 'Jugar de Nuevo' : 'Reiniciar'}
+                </button>
+                <button onClick={backToMenu} className="px-6 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors">
+                    Salir al Menú
+                </button>
+            </div>
+        </div>
+    );
+    
+    const renderContent = () => {
+        switch (gameMode) {
+            case 'pva':
+            case 'pvp':
+                return renderGame();
+            case 'pvp_setup':
+                return renderPvpSetup();
+            case 'menu':
+            default:
+                return renderMenu();
+        }
+    };
 
-  // Emoji
-  $('#btnAddEmoji').addEventListener('click', ()=>{
-    const emoji = $('#emojiInput').value.trim() || '😄';
-    const el = createLayerElement(); el.dataset.type='emoji'; el.dataset.size=64; el.innerHTML = `<div style="font-size:64px;">${escapeHtml(emoji)}</div>`; selectLayer(el);
-  });
-
-  // Decorativos simples (como sticker overlay)
-  $$('.deco').forEach(btn=>btn.addEventListener('click', ()=>{
-    const type = btn.dataset.svg; const el = createLayerElement(); el.dataset.type='deco'; el.dataset.svg=type; el.innerHTML = svgFor(type); selectLayer(el);
-  }));
-
-  // Transformaciones
-  $('#scaleRange').addEventListener('input', ()=>{ if(!state.selectedLayer) return; const s=parseFloat($('#scaleRange').value); state.selectedLayer.dataset.scale=s; updateTransform(state.selectedLayer); });
-  $('#rotateRange').addEventListener('input', ()=>{ if(!state.selectedLayer) return; const r=parseFloat($('#rotateRange').value); state.selectedLayer.dataset.rotate=r; updateTransform(state.selectedLayer); });
-
-  function updateTransform(el){
-    const s = parseFloat(el.dataset.scale||1); const r = parseFloat(el.dataset.rotate||0);
-    el.style.transform = `translate(-50%,-50%) rotate(${r}deg) scale(${s})`;
-  }
-
-  function makeDraggable(el){
-    let dragging=false, start={x:0,y:0}, orig={x:0,y:0};
-    const down = (e)=>{ dragging=true; selectLayer(el); const p = getPointer(e); start=p; const rect=el.getBoundingClientRect(); orig={x:rect.left+rect.width/2, y:rect.top+rect.height/2}; e.preventDefault(); };
-    const move = (e)=>{ if(!dragging) return; const p=getPointer(e); const dx=p.x-start.x, dy=p.y-start.y; const wrap=overlay.getBoundingClientRect(); const cx=orig.x+dx - wrap.left; const cy=orig.y+dy - wrap.top; el.style.left = (cx/wrap.width*100)+"%"; el.style.top=(cy/wrap.height*100)+"%"; };
-    const up =()=> dragging=false;
-    el.addEventListener('mousedown', down); window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
-    el.addEventListener('touchstart', down, {passive:false}); window.addEventListener('touchmove', move, {passive:false}); window.addEventListener('touchend', up);
-  }
-  function makeResizable(el, handle){
-    let resizing=false, start=0, orig=1; handle.addEventListener('mousedown', (e)=>{resizing=true; start=e.clientY; orig=parseFloat(el.dataset.scale||1); e.stopPropagation();});
-    window.addEventListener('mousemove', (e)=>{ if(!resizing) return; const delta=(start-e.clientY)/200; const s=Math.max(.2, Math.min(3, orig+delta)); el.dataset.scale=s; updateTransform(el); });
-    window.addEventListener('mouseup', ()=>resizing=false);
-  }
-  function getPointer(e){ return { x: (e.touches? e.touches[0].clientX:e.clientX), y:(e.touches? e.touches[0].clientY:e.clientY) } }
-
-  // -------------------- Render compuesto (canvas + capas) --------------------
-  function render(){
-    // redibuja base + filtros + sin capas (capas viven en DOM). Para exportar, se fusiona todo.
-    if(state.baseImage){ fitToCanvas(); } else { clearCanvas(); }
-    // Dibuja rectángulo de recorte
-    if(state.cropMode && state.cropRect){ const {x,y,w,h} = state.cropRect; ctx.save(); ctx.strokeStyle= '#ef4444'; ctx.lineWidth=2; ctx.setLineDash([6,4]); ctx.strokeRect(x,y,w,h); ctx.restore(); }
-  }
-  $('#btnFitCanvas').addEventListener('click', fitToCanvas);
-  $('#btnClearAll').addEventListener('click', ()=>{ overlay.innerHTML=''; state.layers=[]; state.baseImage=null; state.baseImageOriginal=null; clearCanvas(); });
-  $('#btnNew').addEventListener('click', ()=>{ overlay.innerHTML=''; state.layers=[]; clearCanvas(); });
-
-  // -------------------- Fusionar todo a una imagen --------------------
-  async function exportCurrentSticker(fmt='image/webp', quality=0.95){
-    // Clona el canvas y dibuja también las capas DOM (texto/emoji/deco) renderizadas como raster.
-    const out = document.createElement('canvas'); out.width=canvas.width; out.height=canvas.height; const octx=out.getContext('2d');
-    // base (canvas actual):
-    octx.drawImage(canvas,0,0);
-    // capas: recorrer overlay children, rasterizar
-    const wrapRect = overlay.getBoundingClientRect();
-    for(const el of overlay.children){
-      const rect = el.getBoundingClientRect();
-      const cx = (rect.left - wrapRect.left) / wrapRect.width * out.width;
-      const cy = (rect.top - wrapRect.top) / wrapRect.height * out.height;
-      const w = rect.width / wrapRect.width * out.width;
-      const h = rect.height / wrapRect.height * out.height;
-      // Convertir elemento DOM a imagen usando SVG foreignObject
-      const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}'><foreignObject width='100%' height='100%'>${new XMLSerializer().serializeToString(el.cloneNode(true))}</foreignObject></svg>`;
-      const url = 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
-      await new Promise(res=>{ const img=new Image(); img.onload=()=>{ octx.save(); // aplicar transformaciones ya baked en el clone
-        octx.drawImage(img, cx, cy, w, h); octx.restore(); res(); }; img.src=url; });
-    }
-    // devuelve Blob
-    const blob = await new Promise(res=>out.toBlob(res, fmt, quality));
-    return blob;
-  }
-
-  // -------------------- Añadir al pack y gestión --------------------
-  $('#btnAddToPack').addEventListener('click', async ()=>{
-    const blob = await exportCurrentSticker('image/webp', 0.95);
-    const url = URL.createObjectURL(blob); const img = new Image(); img.src=url; await img.decode();
-    // thumb
-    const dataURL = await blobToDataURL(blob);
-    state.pack.items.push({ dataURL });
-    paintCurrentPack();
-    URL.revokeObjectURL(url);
-  });
-
-  function paintCurrentPack(){
-    const grid = $('#currentPackGrid'); grid.innerHTML='';
-    state.pack.items.forEach((it,idx)=>{
-      const div=document.createElement('div'); div.className='thumb fade-in';
-      div.innerHTML=`<img src='${it.dataURL}' alt='st${idx}'/><div style='display:flex; gap:6px; margin-top:6px; justify-content:center'><button class='btn secondary' data-act='dl' data-idx='${idx}'>PNG</button><button class='btn secondary' data-act='rm' data-idx='${idx}'>Quitar</button></div>`;
-      grid.appendChild(div);
-    });
-    grid.querySelectorAll('button').forEach(b=>b.addEventListener('click', async (e)=>{
-      const idx = parseInt(b.dataset.idx);
-      if(b.dataset.act==='rm'){ state.pack.items.splice(idx,1); paintCurrentPack(); }
-      if(b.dataset.act==='dl'){
-        const pngBlob = await dataUrlToPng(state.pack.items[idx].dataURL);
-        saveAs(pngBlob, `sticker_${idx+1}.png`);
-      }
-    }));
-  }
-
-  // Guardar/Exportar Pack
-  $('#btnSavePack').addEventListener('click', ()=>{
-    refreshPackMetaFromForm(); savePackToLocal(); loadMyPacksList(); alert('Pack guardado localmente.');
-  });
-  $('#btnExportPack').addEventListener('click', async ()=>{
-    refreshPackMetaFromForm(); const zip = new JSZip();
-    const slug = slugify(state.pack.name||'mi-pack');
-    const folder = zip.folder(slug);
-    const meta = { name: state.pack.name, description: state.pack.desc, author: state.pack.author, count: state.pack.items.length, format:'webp', createdAt: new Date().toISOString() };
-    folder.file('metadata.json', JSON.stringify(meta, null, 2));
-    for(let i=0;i<state.pack.items.length;i++){
-      const b = await (await fetch(state.pack.items[i].dataURL)).blob();
-      folder.file(`stickers/sticker_${String(i+1).padStart(2,'0')}.webp`, b);
-    }
-    const blob = await zip.generateAsync({type:'blob'});
-    saveAs(blob, `${slug}.zip`);
-  });
-
-  // "Agregar a WhatsApp" — LIMITACIONES WEB
-  $('#btnAddToWhatsApp').addEventListener('click', ()=>{
-    refreshPackMetaFromForm();
-    alert('Integración directa con WhatsApp/Business (Sticker Content Provider) requiere una app Android/iOS nativa. Este proyecto web exporta ZIP y stickers individuales para importarlos con herramientas compatibles. Consulta comentarios en el código para una guía de integración nativa.');
-  });
-
-  function refreshPackMetaFromForm(){
-    state.pack.name = $('#packName').value.trim();
-    state.pack.desc = $('#packDesc').value.trim();
-    state.pack.author = $('#packAuthor').value.trim();
-    state.pack.public = $('#packPublic').value==='si';
-  }
-
-  // -------------------- Mis Packs / Comunidad (LocalStorage) --------------------
-  const LS_KEY = 'sl_packs_v1';
-  const LS_COMMUNITY = 'sl_public_packs_v1';
-
-  function savePackToLocal(){
-    const packs = loadAllPacks();
-    const slug = slugify(state.pack.name||`pack-${Date.now()}`);
-    packs[slug] = JSON.parse(JSON.stringify(state.pack)); // shallow copy
-    localStorage.setItem(LS_KEY, JSON.stringify(packs));
-    if(state.pack.public){
-      const pub = loadAllPublic();
-      pub[slug] = { ...packs[slug], slug };
-      localStorage.setItem(LS_COMMUNITY, JSON.stringify(pub));
-      loadCommunity();
-    }
-  }
-  function loadAllPacks(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'{}'); }catch{return{}} }
-  function loadAllPublic(){ try{ return JSON.parse(localStorage.getItem(LS_COMMUNITY)||'{}'); }catch{return{}} }
-
-  function loadMyPacksList(){
-    const host = loadAllPacks(); const wrap = $('#myPacksList'); wrap.innerHTML='';
-    const keys = Object.keys(host);
-    if(!keys.length){ wrap.innerHTML = '<p class="muted">Aún no tienes packs guardados.</p>'; return; }
-    keys.forEach(slug=>{
-      const pk = host[slug];
-      const cover = pk.items[0]?.dataURL || '';
-      const div = document.createElement('div'); div.className='pack-card fade-in';
-      div.innerHTML = `<img src="${cover}" alt="cover"><div class="meta"><b>${escapeHtml(pk.name||slug)}</b><span class="muted">por ${escapeHtml(pk.author||'Anónimo')}</span><div><span class="pill">${pk.items.length} stickers</span> ${pk.public? '<span class="pill">Público</span>':''}</div></div><div style="display:flex; gap:6px;">
-        <button class='btn secondary' data-act='load' data-slug='${slug}'>Abrir</button>
-        <button class='btn secondary' data-act='zip' data-slug='${slug}'>ZIP</button>
-        <button class='btn warn' data-act='del' data-slug='${slug}'>Borrar</button>
-      </div>`;
-      wrap.appendChild(div);
-    });
-    wrap.querySelectorAll('button').forEach(btn=>btn.addEventListener('click', async ()=>{
-      const slug = btn.dataset.slug; const act=btn.dataset.act; const host=loadAllPacks(); const pk=host[slug];
-      if(act==='del'){ if(confirm('¿Eliminar este pack?')){ delete host[slug]; localStorage.setItem(LS_KEY, JSON.stringify(host)); loadMyPacksList(); } }
-      if(act==='load'){ state.pack = JSON.parse(JSON.stringify(pk)); fillPackForm(); paintCurrentPack(); alert('Pack cargado en el editor.'); }
-      if(act==='zip'){
-        const zip = new JSZip(); const folder = zip.folder(slug); folder.file('metadata.json', JSON.stringify({name:pk.name, description:pk.desc, author:pk.author, count:pk.items.length}, null,2));
-        for(let i=0;i<pk.items.length;i++){ const b = await (await fetch(pk.items[i].dataURL)).blob(); folder.file(`stickers/sticker_${String(i+1).padStart(2,'0')}.webp`, b); }
-        const blob = await zip.generateAsync({type:'blob'}); saveAs(blob, `${slug}.zip`);
-      }
-    }));
-  }
-
-  function fillPackForm(){ $('#packName').value=state.pack.name||''; $('#packDesc').value=state.pack.desc||''; $('#packAuthor').value=state.pack.author||''; $('#packPublic').value=state.pack.public? 'si':'no'; }
-
-  function loadCommunity(){
-    const host = loadAllPublic(); const wrap = $('#communityList'); wrap.innerHTML=''; const keys=Object.keys(host);
-    if(!keys.length){
-      // sembrar demo
-      const demo = {
-        'memes-latam': { name:'Memes LATAM', desc:'Reacciones y frases', author:'Comunidad', public:true, items:[], slug:'memes-latam' },
-        'reacciones-pro': { name:'Reacciones PRO', desc:'Pack compacto', author:'Comunidad', public:true, items:[], slug:'reacciones-pro' },
-      };
-      localStorage.setItem(LS_COMMUNITY, JSON.stringify(demo));
-      return loadCommunity();
-    }
-    keys.forEach(slug=>{
-      const pk = host[slug]; const cover = pk.items[0]?.dataURL || '';
-      const div = document.createElement('div'); div.className='pack-card fade-in';
-      div.innerHTML = `<img src="${cover}" alt="cover"><div class="meta"><b>${escapeHtml(pk.name||slug)}</b><span class="muted">por ${escapeHtml(pk.author||'Anónimo')}</span><div class='muted'>${escapeHtml(pk.desc||'')} • <b>${pk.items.length}</b> stickers</div></div><div style="display:flex; gap:6px;">
-        <button class='btn secondary' data-act='view' data-slug='${slug}'>Ver</button>
-        <button class='btn success' data-act='add' data-slug='${slug}'>Agregar a WhatsApp</button>
-      </div>`;
-      wrap.appendChild(div);
-    });
-    wrap.querySelectorAll('button').forEach(btn=>btn.addEventListener('click', ()=>{
-      const slug=btn.dataset.slug; const pk=loadAllPublic()[slug];
-      if(btn.dataset.act==='view'){
-        alert(`${pk.name} — por ${pk.author}\n${pk.desc}\nStickers: ${pk.items.length}\n\nPista: Carga este pack en el editor mediante Mis packs > Abrir (si lo guardaste localmente como público).`);
-      } else {
-        alert('Para añadir a WhatsApp desde web es necesario instalar/usar una app nativa. Exporta el ZIP y usa una app "Sticker Maker" o integra con un ContentProvider en Android.');
-      }
-    }));
-  }
-
-  // -------------------- Exportar sticker individual --------------------
-  $('#btnExportSticker').addEventListener('click', async ()=>{
-    const blob = await exportCurrentSticker('image/png', 1);
-    saveAs(blob, `sticker_${Date.now()}.png`);
-  });
-
-  // -------------------- Utilidades --------------------
-  function slugify(s){ return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
-  function blobToDataURL(blob){ return new Promise(r=>{ const fr=new FileReader(); fr.onload=()=>r(fr.result); fr.readAsDataURL(blob); }); }
-  async function dataUrlToPng(dataUrl){ const b = await (await fetch(dataUrl)).blob(); const bmp = await createImageBitmap(b); const cnv=document.createElement('canvas'); cnv.width=bmp.width; cnv.height=bmp.height; cnv.getContext('2d').drawImage(bmp,0,0); return await new Promise(res=>cnv.toBlob(res,'image/png')); }
-  function escapeHtml(s){ return s.replace(/[&<>\"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;','\'':'&#39;'}[m])); }
-  function svgFor(type){
-    if(type==='star') return `<svg width="96" height="96" viewBox="0 0 24 24" fill="gold" xmlns="http://www.w3.org/2000/svg"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.402 8.168L12 18.896l-7.336 3.869 1.402-8.168L.132 9.21l8.2-1.192L12 .587z"/></svg>`;
-    if(type==='heart') return `<svg width="96" height="96" viewBox="0 0 24 24" fill="#ff4d6d" xmlns="http://www.w3.org/2000/svg"><path d="M12 21s-6.716-4.35-9.428-7.062A5.934 5.934 0 0112 4.1a5.934 5.934 0 019.428 9.838C18.716 16.65 12 21 12 21z"/></svg>`;
-    if(type==='boom') return `<svg width="110" height="110" viewBox="0 0 24 24" fill="#f59e0b" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5z"/></svg>`;
-    return '';
-  }
-
-  // -------------------- Inicialización --------------------
-  loadMyPacksList();
-  loadCommunity();
-  fillPackForm();
-  render();
-
-  // -------------------- Comentarios de integración oficial (Android) --------------------
-  /*
-   * "Agregar a WhatsApp (oficial)" — Requiere app nativa:
-   *  - Android: Implementa un "Sticker Content Provider" (com.whatsapp.contentprovider) y empaqueta los PNG/WebP y metadata en tu app.
-   *    Documentación: https://faq.whatsapp.com/5919943410799448/?cms_platform=android
-   *  - iOS: Similar con iMessage extension y exportación a WhatsApp compatible.
-   *  - Web: No existe API pública para instalar packs directamente desde una página. Este proyecto exporta ZIP + PNGs/WebP listos para importar con apps "Sticker Maker".
-   *
-   * Sugerencia de flujo si migras a app Android:
-   *  1) Usa este mismo render/export para generar archivos WebP 512x512 con canal alpha.
-   *  2) Crea un content provider con un listado de stickers (mín 3). Metadata incluye tray_image_file, publisher, name y list de stickers.
-   *  3) Expón Intent con acción "com.whatsapp.intent.action.ENABLE_STICKER_PACK" enviando pack_id y pack_authority.
-   */
-  </script>
-</body>
-</html>
+    return (
+        <div className="bg-gray-900 min-h-screen text-white flex flex-col items-center justify-center p-4 font-sans">
+            <div className="w-full max-w-md mx-auto flex flex-col items-center">
+                {isAuthReady ? renderContent() : <p className="text-2xl">Conectando al servicio...</p>}
+            </div>
+             <footer className="absolute bottom-4 text-gray-500 text-sm">
+                Tu ID de jugador: <span className="font-mono text-gray-400">{userId || "Cargando..."}</span>
+            </footer>
+        </div>
+    );
+}
