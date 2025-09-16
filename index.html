@@ -3,303 +3,480 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini Roguelike HTML5 con IA</title>
+    <title>Generador de Cursos Completos Gratis</title>
     <style>
-        body {
-            background-color: #1a1a1a;
-            color: #f0f0f0;
-            font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+        }
+        
+        * {
             margin: 0;
-            padding: 10px;
+            padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        canvas {
-            background-color: #000;
-            border: 2px solid #555;
-            border-radius: 8px;
-            max-width: 100%;
-            max-height: 60vh;
+        
+        body {
+            background-color: #f0f2f5;
+            color: var(--dark);
+            line-height: 1.6;
         }
-        #ui-container {
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        
+        .generator-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            margin-top: 15px;
-            width: 100%;
-            max-width: 640px;
+            margin-bottom: 20px;
         }
-        #info {
-            font-size: 1.2em;
-            width: 100%;
-            text-align: center;
-        }
-        #descriptionBox {
-            background-color: #252525;
-            border: 1px solid #444;
-            border-radius: 6px;
+        
+        input[type="text"] {
+            flex: 1;
             padding: 15px;
-            min-height: 60px;
-            width: 100%;
-            box-sizing: border-box;
-            text-align: center;
-            color: #b0e0e6; /* Un color azul pálido para el texto de la IA */
-            font-style: italic;
+            border: 2px solid #ddd;
+            border-radius: 5px 0 0 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
         }
-        .gemini-button {
-            background: linear-gradient(45deg, #4f46e5, #c026d3);
+        
+        input[type="text"]:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+        
+        button {
+            padding: 15px 25px;
+            background-color: var(--primary);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 1em;
-            font-weight: bold;
+            border-radius: 0 5px 5px 0;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
         }
-        .gemini-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        
+        button:hover {
+            background-color: var(--secondary);
         }
-        .gemini-button:disabled {
-            background: #555;
-            cursor: not-allowed;
+        
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
         }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
+        
+        .option-pill {
+            padding: 8px 16px;
+            background-color: #e9ecef;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .option-pill:hover {
+            background-color: #dee2e6;
+        }
+        
+        .option-pill.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .course-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .modules-container {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .module {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        .module-header {
+            padding: 15px 20px;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .module-content {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+        }
+        
+        .module-content.open {
+            padding: 20px;
+            max-height: 1000px;
+        }
+        
+        .lesson {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .lesson:last-child {
+            border-bottom: none;
+        }
+        
+        .resources {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #eee;
+        }
+        
+        .resource {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .resource-icon {
+            margin-right: 8px;
+            color: var(--primary);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--primary);
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 30px;
+            height: 30px;
             animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
         }
+        
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
         }
-        .controls {
-            margin-top: 10px;
-            color: #888;
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .input-group {
+                flex-direction: column;
+            }
+            
+            input[type="text"] {
+                border-radius: 5px;
+                margin-bottom: 10px;
+            }
+            
+            button {
+                border-radius: 5px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Roguelike con IA</h1>
-    <canvas id="gameCanvas" width="640" height="480"></canvas>
-    <div id="ui-container">
-        <div id="info">Nivel: 1 | Tesoro: 0</div>
-        <div id="descriptionBox">Mueve a tu personaje y haz clic en el botón para obtener una descripción de tu entorno.</div>
-        <button id="geminiBtn" class="gemini-button">✨ Describir la sala</button>
+    <div class="container">
+        <header>
+            <h1>Generador de Cursos Completos</h1>
+            <p class="subtitle">Ingresa un título y obtén un curso completo al instante - Totalmente gratis</p>
+        </header>
+        
+        <div class="generator-box">
+            <div class="input-group">
+                <input type="text" id="courseTitle" placeholder="Ej: Introducción a la Programación Web">
+                <button id="generateBtn">Generar Curso</button>
+            </div>
+            
+            <div class="options">
+                <div class="option-pill active" data-level="beginner">Principiante</div>
+                <div class="option-pill" data-level="intermediate">Intermedio</div>
+                <div class="option-pill" data-level="advanced">Avanzado</div>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Generando tu curso... Esto puede tomar unos segundos</p>
+            </div>
+            
+            <div class="results" id="results">
+                <div class="course-header">
+                    <h2 id="generatedTitle"></h2>
+                    <p id="courseDescription"></p>
+                </div>
+                
+                <div class="modules-container" id="modulesContainer">
+                    <!-- Los módulos se insertarán aquí mediante JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 Generador de Cursos Completos - Todos los recursos educativos son gratuitos</p>
+        </footer>
     </div>
-    <div class="controls">Usa las teclas de flecha para moverte.</div>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const infoDiv = document.getElementById('info');
-        const descriptionBox = document.getElementById('descriptionBox');
-        const geminiBtn = document.getElementById('geminiBtn');
-
-        const TILE_SIZE = 32;
-        const MAP_WIDTH = canvas.width / TILE_SIZE;
-        const MAP_HEIGHT = canvas.height / TILE_SIZE;
-
-        // --- Estado del Juego ---
-        let player = { x: 1, y: 1 };
-        let treasures = [];
-        let exit = { x: 0, y: 0 };
-        let map = [];
-        let score = 0;
-        let level = 1;
-
-        // --- Generación del Mapa ---
-        function generateLevel() {
-            // 1. Llenar todo de muros
-            map = Array(MAP_WIDTH).fill(0).map(() => Array(MAP_HEIGHT).fill(1)); // 1 = Muro
-
-            let x = Math.floor(MAP_WIDTH / 2);
-            let y = Math.floor(MAP_HEIGHT / 2);
-            const totalTiles = MAP_WIDTH * MAP_HEIGHT;
-            const floorTilesToCreate = totalTiles / 2.5;
-            let floorsCreated = 0;
-
-            // 2. "Cavar" túneles aleatoriamente
-            while (floorsCreated < floorTilesToCreate) {
-                if (map[x][y] === 1) {
-                    map[x][y] = 0; // 0 = Suelo
-                    floorsCreated++;
-                }
-                const direction = Math.floor(Math.random() * 4);
-                switch (direction) {
-                    case 0: if (x > 1) x--; break;
-                    case 1: if (x < MAP_WIDTH - 2) x++; break;
-                    case 2: if (y > 1) y--; break;
-                    case 3: if (y < MAP_HEIGHT - 2) y++; break;
-                }
-            }
-
-            const placeObject = (objectType) => {
-                let placed = false;
-                while (!placed) {
-                    let posX = Math.floor(Math.random() * MAP_WIDTH);
-                    let posY = Math.floor(Math.random() * MAP_HEIGHT);
-                    if (map[posX][posY] === 0) {
-                        if (objectType === 'player') {
-                           player = { x: posX, y: posY };
-                        } else if (objectType === 'exit') {
-                           exit = { x: posX, y: posY };
-                        } else if (objectType === 'treasure') {
-                           treasures.push({ x: posX, y: posY });
-                        }
-                        placed = true;
-                    }
-                }
-            };
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateBtn = document.getElementById('generateBtn');
+            const courseTitleInput = document.getElementById('courseTitle');
+            const loadingElement = document.getElementById('loading');
+            const resultsElement = document.getElementById('results');
+            const generatedTitle = document.getElementById('generatedTitle');
+            const courseDescription = document.getElementById('courseDescription');
+            const modulesContainer = document.getElementById('modulesContainer');
+            const optionPills = document.querySelectorAll('.option-pill');
             
-            placeObject('player');
-            placeObject('exit');
-            treasures = [];
-            for (let i = 0; i < 5; i++) {
-                placeObject('treasure');
-            }
-        }
-
-        // --- Dibujado ---
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            for (let x = 0; x < MAP_WIDTH; x++) {
-                for (let y = 0; y < MAP_HEIGHT; y++) {
-                    ctx.fillStyle = map[x][y] === 1 ? '#454545' : '#2a2a2a';
-                    ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                }
-            }
+            let difficultyLevel = 'beginner';
             
-            // Dibujar salida
-            ctx.fillStyle = '#8e44ad';
-            ctx.fillRect(exit.x * TILE_SIZE, exit.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-
-            // Dibujar tesoros
-            ctx.fillStyle = '#f1c40f';
-            treasures.forEach(t => {
-                ctx.beginPath();
-                ctx.arc(t.x * TILE_SIZE + TILE_SIZE / 2, t.y * TILE_SIZE + TILE_SIZE / 2, TILE_SIZE / 4, 0, 2 * Math.PI);
-                ctx.fill();
-            });
-
-            // Dibujar jugador
-            ctx.fillStyle = '#3498db';
-            ctx.beginPath();
-            ctx.arc(player.x * TILE_SIZE + TILE_SIZE / 2, player.y * TILE_SIZE + TILE_SIZE / 2, TILE_SIZE / 2 - 4, 0, 2 * Math.PI);
-            ctx.fill();
-
-            // Actualizar info
-            infoDiv.textContent = `Nivel: ${level} | Tesoro: ${score}`;
-        }
-
-        // --- Controles y Lógica del Juego ---
-        function handleInput(e) {
-            let newX = player.x;
-            let newY = player.y;
-
-            switch (e.key) {
-                case 'ArrowUp': newY--; break;
-                case 'ArrowDown': newY++; break;
-                case 'ArrowLeft': newX--; break;
-                case 'ArrowRight': newX++; break;
-                default: return;
-            }
-
-            // Comprobar colisión con muros
-            if (map[newX] && map[newX][newY] === 0) {
-                player.x = newX;
-                player.y = newY;
-                
-                // Comprobar si hay tesoro
-                const treasureIndex = treasures.findIndex(t => t.x === player.x && t.y === player.y);
-                if (treasureIndex > -1) {
-                    score++;
-                    treasures.splice(treasureIndex, 1);
-                }
-
-                // Comprobar si está en la salida
-                if (player.x === exit.x && player.y === exit.y) {
-                    level++;
-                    generateLevel();
-                }
-                
-                draw();
-            }
-        }
-
-        // --- Integración con Gemini API ---
-        async function generateDescription() {
-            geminiBtn.disabled = true;
-            descriptionBox.innerHTML = '<div class="loader"></div>';
-
-            // Construir un prompt contextual
-            let wallCount = 0;
-            const neighbors = [[0, -1], [0, 1], [-1, 0], [1, 0]];
-            neighbors.forEach(([dx, dy]) => {
-                const nx = player.x + dx;
-                const ny = player.y + dy;
-                if (!map[nx] || map[nx][ny] === 1) {
-                    wallCount++;
-                }
-            });
-
-            let context = "en medio de una sala abierta.";
-            if (wallCount === 1) context = "en una sala grande.";
-            if (wallCount === 2) context = "en un pasillo.";
-            if (wallCount === 3) context = "en un callejón sin salida.";
-            
-            const systemPrompt = "Eres un director de mazmorras de fantasía, narrando un juego roguelike. Sé breve (2-3 frases), atmosférico y misterioso. Describe lo que el jugador ve en la cueva oscura. No te repitas.";
-            const userQuery = `El jugador está ${context} ¿Qué ve?`;
-
-            try {
-                const apiKey = "";
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-                const payload = {
-                    contents: [{ parts: [{ text: userQuery }] }],
-                    systemInstruction: { parts: [{ text: systemPrompt }] },
-                };
-
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+            // Manejar selección de nivel de dificultad
+            optionPills.forEach(pill => {
+                pill.addEventListener('click', function() {
+                    optionPills.forEach(p => p.classList.remove('active'));
+                    this.classList.add('active');
+                    difficultyLevel = this.getAttribute('data-level');
                 });
+            });
+            
+            // Generar curso al hacer clic en el botón
+            generateBtn.addEventListener('click', function() {
+                const title = courseTitleInput.value.trim();
                 
-                if (!response.ok) {
-                    throw new Error(`Error de API: ${response.statusText}`);
+                if (title === '') {
+                    alert('Por favor, ingresa un título para tu curso');
+                    return;
                 }
-
-                const result = await response.json();
-                const description = result.candidates[0]?.content?.parts[0]?.text;
                 
-                descriptionBox.textContent = description || "No se pudo obtener una descripción.";
-
-            } catch (error) {
-                console.error("Error al llamar a la API de Gemini:", error);
-                descriptionBox.textContent = "El narrador ancestral guarda silencio por ahora...";
-            } finally {
-                geminiBtn.disabled = false;
+                // Mostrar carga
+                loadingElement.style.display = 'block';
+                resultsElement.style.display = 'none';
+                
+                // Simular tiempo de generación (en una implementación real, aquí se conectaría a una API)
+                setTimeout(() => {
+                    generateCourse(title, difficultyLevel);
+                    loadingElement.style.display = 'none';
+                    resultsElement.style.display = 'block';
+                }, 2000);
+            });
+            
+            // Función para generar la estructura del curso
+            function generateCourse(title, level) {
+                // Establecer título
+                generatedTitle.textContent = title;
+                
+                // Generar descripción basada en el título y nivel
+                const descriptions = {
+                    beginner: `Curso introductorio perfecto para principiantes. Aprende los fundamentos esenciales de ${title} desde cero.`,
+                    intermediate: `Curso completo para aquellos con conocimientos básicos que desean profundizar en ${title}.`,
+                    advanced: `Curso especializado para expertos que buscan dominar las técnicas avanzadas de ${title}.`
+                };
+                
+                courseDescription.textContent = descriptions[level];
+                
+                // Generar módulos (en una implementación real, esto vendría de una API)
+                const modules = generateModules(title, level);
+                
+                // Limpiar contenedor
+                modulesContainer.innerHTML = '';
+                
+                // Añadir módulos al DOM
+                modules.forEach((module, index) => {
+                    const moduleElement = document.createElement('div');
+                    moduleElement.className = 'module';
+                    moduleElement.innerHTML = `
+                        <div class="module-header" onclick="toggleModule(${index})">
+                            <h3>${module.title}</h3>
+                            <span>${module.lessons.length} lecciones</span>
+                        </div>
+                        <div class="module-content" id="module-${index}">
+                            ${module.lessons.map(lesson => `
+                                <div class="lesson">
+                                    <h4>${lesson.title}</h4>
+                                    <p>${lesson.description}</p>
+                                </div>
+                            `).join('')}
+                            <div class="resources">
+                                <h4>Recursos adicionales</h4>
+                                ${module.resources.map(resource => `
+                                    <div class="resource">
+                                        <span class="resource-icon">📚</span>
+                                        <a href="${resource.link}" target="_blank">${resource.title}</a>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                    modulesContainer.appendChild(moduleElement);
+                });
             }
-        }
-
-        // --- Inicio ---
-        window.addEventListener('keydown', handleInput);
-        geminiBtn.addEventListener('click', generateDescription);
+            
+            // Función para generar módulos de ejemplo
+            function generateModules(title, level) {
+                // Esta es una simulación - en una aplicación real, esto se generaría con IA
+                const moduleTemplates = {
+                    beginner: [
+                        {
+                            title: `Introducción a ${title}`,
+                            lessons: [
+                                { title: '¿Qué es? Historia y conceptos básicos', description: 'Una visión general del campo y su importancia.' },
+                                { title: 'Terminología esencial', description: 'Aprende el vocabulario fundamental que necesitarás.' },
+                                { title: 'Herramientas básicas y recursos', description: 'Configuración del entorno de trabajo inicial.' }
+                            ],
+                            resources: [
+                                { title: 'Guía de conceptos básicos', link: '#' },
+                                { title: 'Lista de verificación de herramientas', link: '#' }
+                            ]
+                        },
+                        {
+                            title: 'Fundamentos y principios básicos',
+                            lessons: [
+                                { title: 'Los pilares fundamentales', description: 'Conoce las bases sobre las que se construye todo.' },
+                                { title: 'Técnicas esenciales para principiantes', description: 'Domina las habilidades iniciales necesarias.' },
+                                { title: 'Ejercicios prácticos de iniciación', description: 'Pon en práctica lo aprendido con proyectos simples.' }
+                            ],
+                            resources: [
+                                { title: 'Ejercicios prácticos', link: '#' },
+                                { title: 'Plantillas para comenzar', link: '#' }
+                            ]
+                        },
+                        {
+                            title: 'Proyecto práctico inicial',
+                            lessons: [
+                                { title: 'Planificación del primer proyecto', description: 'Cómo estructurar y organizar tu trabajo.' },
+                                { title: 'Desarrollo paso a paso', description: 'Sigue el proceso de creación con guías detalladas.' },
+                                { title: 'Revisión y mejora', description: 'Aprende a evaluar y refinar tu trabajo.' }
+                            ],
+                            resources: [
+                                { title: 'Plantilla de proyecto', link: '#' },
+                                { title: 'Casos de estudio', link: '#' }
+                            ]
+                        }
+                    ],
+                    intermediate: [
+                        {
+                            title: `Conceptos intermedios de ${title}`,
+                            lessons: [
+                                { title: 'Técnicas y métodos avanzados', description: 'Profundiza en approaches más sofisticados.' },
+                                { title: 'Resolución de problemas comunes', description: 'Cómo abordar desafíos típicos.' },
+                                { title: 'Optimización de flujos de trabajo', description: 'Mejora tu eficiencia y productividad.' }
+                            ],
+                            resources: [
+                                { title: 'Guía de técnicas', link: '#' },
+                                { title: 'Plantillas de optimización', link: '#' }
+                            ]
+                        },
+                        {
+                            title: 'Aplicaciones prácticas',
+                            lessons: [
+                                { title: 'Casos de estudio reales', description: 'Analiza ejemplos del mundo real.' },
+                                { title: 'Proyectos de complejidad media', description: 'Desarrolla habilidades con desafíos apropiados.' },
+                                { title: 'Análisis y retroalimentación', description: 'Aprende a evaluar críticamente el trabajo.' }
+                            ],
+                            resources: [
+                                { title: 'Repositorio de casos', link: '#' },
+                                { title: 'Herramientas de análisis', link: '#' }
+                            ]
+                        }
+                    ],
+                    advanced: [
+                        {
+                            title: `Temas avanzados en ${title}`,
+                            lessons: [
+                                { title: 'Técnicas especializadas', description: 'Domina métodos reservados para expertos.' },
+                                { title: 'Enfoques innovadores', description: 'Técnicas de vanguardia y tendencias emergentes.' },
+                                { title: 'Automatización y optimización extrema', description: 'Maximiza la eficiencia con técnicas avanzadas.' }
+                            ],
+                            resources: [
+                                { title: 'Paper de investigación', link: '#' },
+                                { title: 'Herramientas avanzadas', link: '#' }
+                            ]
+                        },
+                        {
+                            title: 'Proyecto de maestría',
+                            lessons: [
+                                { title: 'Diseño de un proyecto complejo', description: 'Planificación de iniciativas ambiciosas.' },
+                                { title: 'Implementación de técnicas avanzadas', description: 'Aplicación de métodos especializados.' },
+                                { title: 'Presentación y documentación profesional', description: 'Comunicación efectiva de trabajo complejo.' }
+                            ],
+                            resources: [
+                                { title: 'Plantilla de documentación', link: '#' },
+                                { title: 'Ejemplos de portfolios', link: '#' }
+                            ]
+                        }
+                    ]
+                };
+                
+                return moduleTemplates[level];
+            }
+        });
         
-        generateLevel();
-        draw();
+        // Función global para alternar módulos (necesaria para el onclick)
+        function toggleModule(index) {
+            const moduleContent = document.getElementById(`module-${index}`);
+            moduleContent.classList.toggle('open');
+        }
     </script>
 </body>
 </html>
-
