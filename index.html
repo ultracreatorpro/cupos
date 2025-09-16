@@ -221,7 +221,7 @@
         
         .module-content.open {
             padding: 20px;
-            max-height: 2000px;
+            max-height: 5000px;
         }
         
         .lesson {
@@ -308,6 +308,24 @@
             border-top: 1px solid #e9ecef;
         }
         
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: var(--success);
+            color: white;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(200%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
         @media (max-width: 768px) {
             .input-group {
                 flex-direction: column;
@@ -355,8 +373,8 @@
                 <div class="option-pill active" data-level="beginner">Principiante</div>
                 <div class="option-pill" data-level="intermediate">Intermedio</div>
                 <div class="option-pill" data-level="advanced">Avanzado</div>
+                <div class="option-pill active" data-duration="medium">Duración Media</div>
                 <div class="option-pill" data-duration="short">Curso Corto</div>
-                <div class="option-pill" data-duration="medium">Curso Medio</div>
                 <div class="option-pill" data-duration="extensive">Curso Extenso</div>
             </div>
             
@@ -387,13 +405,13 @@
                 </div>
                 
                 <div class="download-options">
-                    <button class="download-btn" onclick="downloadCourse('pdf')">
-                        <span>📄</span> Descargar PDF
+                    <button class="download-btn" onclick="downloadCourse('txt')">
+                        <span>📄</span> Descargar TXT
                     </button>
                     <button class="download-btn" onclick="downloadCourse('html')">
                         <span>📋</span> Exportar HTML
                     </button>
-                    <button class="download-btn" onclick="printCourse()">
+                    <button class="download-btn" onclick="window.print()">
                         <span>🖨️</span> Imprimir Curso
                     </button>
                 </div>
@@ -410,6 +428,8 @@
         </footer>
     </div>
 
+    <div class="notification" id="notification">Curso generado con éxito!</div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const generateBtn = document.getElementById('generateBtn');
@@ -420,6 +440,7 @@
             const courseDescription = document.getElementById('courseDescription');
             const modulesContainer = document.getElementById('modulesContainer');
             const optionPills = document.querySelectorAll('.option-pill');
+            const notification = document.getElementById('notification');
             
             let difficultyLevel = 'beginner';
             let courseDuration = 'medium';
@@ -428,13 +449,13 @@
             optionPills.forEach(pill => {
                 pill.addEventListener('click', function() {
                     if (this.getAttribute('data-level')) {
-                        optionPills.forEach(p => {
-                            if (p.getAttribute('data-level')) p.classList.remove('active');
+                        document.querySelectorAll('.option-pill[data-level]').forEach(p => {
+                            p.classList.remove('active');
                         });
                         difficultyLevel = this.getAttribute('data-level');
                     } else if (this.getAttribute('data-duration')) {
-                        optionPills.forEach(p => {
-                            if (p.getAttribute('data-duration')) p.classList.remove('active');
+                        document.querySelectorAll('.option-pill[data-duration]').forEach(p => {
+                            p.classList.remove('active');
                         });
                         courseDuration = this.getAttribute('data-duration');
                     }
@@ -447,7 +468,7 @@
                 const title = courseTitleInput.value.trim();
                 
                 if (title === '') {
-                    alert('Por favor, ingresa un título para tu curso');
+                    showNotification('Por favor, ingresa un título para tu curso', 'error');
                     return;
                 }
                 
@@ -460,11 +481,23 @@
                     generateCourse(title, difficultyLevel, courseDuration);
                     loadingElement.style.display = 'none';
                     resultsElement.style.display = 'block';
+                    showNotification('Curso generado con éxito!');
                     
                     // Desplazarse suavemente hacia los resultados
                     resultsElement.scrollIntoView({ behavior: 'smooth' });
                 }, 2000);
             });
+            
+            // Función para mostrar notificaciones
+            function showNotification(message, type = 'success') {
+                notification.textContent = message;
+                notification.style.backgroundColor = type === 'success' ? 'var(--success)' : 'var(--danger)';
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
             
             // Función para generar la estructura del curso
             function generateCourse(title, level, duration) {
@@ -524,6 +557,11 @@
                     `;
                     modulesContainer.appendChild(moduleElement);
                 });
+                
+                // Expandir el primer módulo por defecto
+                setTimeout(() => {
+                    toggleModule(0);
+                }, 100);
             }
             
             // Función para generar módulos de ejemplo
@@ -567,7 +605,7 @@
                             lessons: [
                                 { title: 'Técnicas y métodos avanzados', description: 'Profundiza en approaches más sofisticados.', duration: '1.5 horas' },
                                 { title: 'Resolución de problemas comunes', description: 'Cómo abordar desafíos típicos.', duration: '1 hora' },
-                                { title: 'Optimización de flujos de trabajo', description: 'Mejora tu eficiencia y productividad.', duration: '1.5 horas' }
+                                { title: 'Optimización de flujos de trabajo', description: 'Mejora tu eficiencia y productividad.', duration: '1.5 hours' }
                             ],
                             resources: [
                                 { title: 'Guía de técnicas', link: '#', icon: '📚' },
@@ -611,7 +649,7 @@
                     modules = modules.slice(0, 3);
                 } else if (duration === 'extensive') {
                     // Duplicar algunos módulos para cursos extensos
-                    const extraModules = JSON.parse(JSON.stringify(modules));
+                    const extraModules = JSON.parse(JSON.stringify(modules.slice(0, 2)));
                     modules = modules.concat(extraModules);
                 }
                 
@@ -625,13 +663,52 @@
             moduleContent.classList.toggle('open');
         }
         
-        // Funciones de descarga (simuladas)
+        // Funciones de descarga
         function downloadCourse(format) {
-            alert(`Función de descarga en formato ${format} sería implementada aquí. En una aplicación real, esto generaría y descargaría el curso completo.`);
+            const title = document.getElementById('generatedTitle').textContent;
+            let content = "";
+            
+            if (format === 'txt') {
+                content = `Curso: ${title}\n`;
+                content += `Descripción: ${document.getElementById('courseDescription').textContent}\n\n`;
+                
+                const modules = document.querySelectorAll('.module');
+                modules.forEach((module, index) => {
+                    const moduleTitle = module.querySelector('.module-header h3').textContent;
+                    content += `Módulo ${index + 1}: ${moduleTitle}\n`;
+                    
+                    const lessons = module.querySelectorAll('.lesson');
+                    lessons.forEach((lesson, lessonIndex) => {
+                        const lessonTitle = lesson.querySelector('h4').textContent;
+                        const lessonDesc = lesson.querySelector('p').textContent;
+                        content += `  Lección ${lessonIndex + 1}: ${lessonTitle}\n`;
+                        content += `    ${lessonDesc}\n`;
+                    });
+                    
+                    content += '\n';
+                });
+                
+                downloadFile(content, `${title.replace(/\s+/g, '_')}.txt`, 'text/plain');
+                
+            } else if (format === 'html') {
+                content = `<html><head><title>${title}</title></head><body>`;
+                content += `<h1>${title}</h1>`;
+                content += `<p>${document.getElementById('courseDescription').textContent}</p>`;
+                content += document.getElementById('modulesContainer').innerHTML;
+                content += '</body></html>';
+                
+                downloadFile(content, `${title.replace(/\s+/g, '_')}.html`, 'text/html');
+            }
         }
         
-        function printCourse() {
-            alert('Función de impresión sería implementada aquí. En una aplicación real, esto imprimiría el curso completo.');
+        function downloadFile(content, fileName, contentType) {
+            const blob = new Blob([content], { type: contentType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            URL.revokeObjectURL(url);
         }
     </script>
 </body>
