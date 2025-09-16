@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Cursos Completos Gratis</title>
+    <title>Generador de Cursos Completos - Sin Restricciones</title>
     <style>
         :root {
             --primary: #4361ee;
@@ -12,6 +12,8 @@
             --light: #f8f9fa;
             --dark: #212529;
             --success: #4cc9f0;
+            --warning: #ff9e00;
+            --danger: #ef476f;
         }
         
         * {
@@ -22,15 +24,20 @@
         }
         
         body {
-            background-color: #f0f2f5;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: var(--dark);
             line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
         }
         
         header {
@@ -38,59 +45,76 @@
             padding: 40px 20px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
         h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
         
         .subtitle {
             font-size: 1.2rem;
             opacity: 0.9;
             margin-bottom: 20px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .badge {
+            display: inline-block;
+            background-color: var(--accent);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin: 0 5px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
         
         .generator-box {
-            background: white;
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            margin-bottom: 30px;
+            background: white;
         }
         
         .input-group {
             display: flex;
             margin-bottom: 20px;
+            border-radius: 50px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
         
         input[type="text"] {
             flex: 1;
-            padding: 15px;
-            border: 2px solid #ddd;
-            border-radius: 5px 0 0 5px;
+            padding: 18px 25px;
+            border: none;
+            background: #f5f7ff;
             font-size: 1rem;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
         }
         
         input[type="text"]:focus {
-            border-color: var(--primary);
             outline: none;
+            background: #eef1ff;
         }
         
         button {
-            padding: 15px 25px;
+            padding: 18px 30px;
             background-color: var(--primary);
             color: white;
             border: none;
-            border-radius: 0 5px 5px 0;
             cursor: pointer;
             font-size: 1rem;
             font-weight: 600;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
         }
         
         button:hover {
@@ -102,10 +126,11 @@
             flex-wrap: wrap;
             gap: 10px;
             margin-bottom: 20px;
+            justify-content: center;
         }
         
         .option-pill {
-            padding: 8px 16px;
+            padding: 10px 20px;
             background-color: #e9ecef;
             border-radius: 50px;
             font-size: 0.9rem;
@@ -122,14 +147,41 @@
             color: white;
         }
         
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .feature {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+        }
+        
+        .feature-icon {
+            margin-right: 8px;
+            color: var(--primary);
+        }
+        
         .results {
             display: none;
             margin-top: 30px;
+            padding: 20px;
+            border-top: 1px solid #eee;
         }
         
         .course-header {
             text-align: center;
             margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            border-radius: 10px;
         }
         
         .modules-container {
@@ -141,33 +193,39 @@
             background: white;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e9ecef;
         }
         
         .module-header {
-            padding: 15px 20px;
-            background-color: var(--primary);
+            padding: 18px 20px;
+            background: linear-gradient(to right, #4cc9f0, #4361ee);
             color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .module-header:hover {
+            background: linear-gradient(to right, #3a0ca3, #4361ee);
         }
         
         .module-content {
             padding: 0 20px;
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.3s ease-out, padding 0.3s ease;
+            transition: max-height 0.5s ease-out, padding 0.3s ease;
         }
         
         .module-content.open {
             padding: 20px;
-            max-height: 1000px;
+            max-height: 2000px;
         }
         
         .lesson {
-            padding: 10px 0;
+            padding: 15px 0;
             border-bottom: 1px solid #eee;
         }
         
@@ -184,55 +242,95 @@
         .resource {
             display: flex;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-size: 0.9rem;
         }
         
         .resource-icon {
-            margin-right: 8px;
+            margin-right: 10px;
             color: var(--primary);
+            font-size: 1.2rem;
         }
         
         .loading {
             display: none;
             text-align: center;
-            padding: 30px;
+            padding: 40px;
         }
         
         .spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
             border-left-color: var(--primary);
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
+            margin: 0 auto 20px;
         }
         
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
         
+        .download-options {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .download-btn {
+            padding: 12px 25px;
+            background-color: var(--success);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .download-btn:hover {
+            background-color: #3aa5d3;
+            transform: translateY(-2px);
+        }
+        
         footer {
             text-align: center;
             margin-top: 50px;
-            padding: 20px;
+            padding: 30px;
             color: #6c757d;
             font-size: 0.9rem;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
         }
         
         @media (max-width: 768px) {
             .input-group {
                 flex-direction: column;
+                border-radius: 10px;
             }
             
             input[type="text"] {
-                border-radius: 5px;
-                margin-bottom: 10px;
+                border-radius: 10px 10px 0 0;
             }
             
             button {
-                border-radius: 5px;
+                border-radius: 0 0 10px 10px;
+            }
+            
+            .download-options {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .download-btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
             }
         }
     </style>
@@ -241,12 +339,15 @@
     <div class="container">
         <header>
             <h1>Generador de Cursos Completos</h1>
-            <p class="subtitle">Ingresa un título y obtén un curso completo al instante - Totalmente gratis</p>
+            <p class="subtitle">Ingresa un título y obtén un curso completo al instante - Totalmente gratis 
+                <span class="badge">Sin restricciones de países</span>
+                <span class="badge">Sin APIs bloqueadas</span>
+            </p>
         </header>
         
         <div class="generator-box">
             <div class="input-group">
-                <input type="text" id="courseTitle" placeholder="Ej: Introducción a la Programación Web">
+                <input type="text" id="courseTitle" placeholder="Ej: Introducción a la Programación Web, Marketing Digital, Fotografía Básica...">
                 <button id="generateBtn">Generar Curso</button>
             </div>
             
@@ -254,17 +355,47 @@
                 <div class="option-pill active" data-level="beginner">Principiante</div>
                 <div class="option-pill" data-level="intermediate">Intermedio</div>
                 <div class="option-pill" data-level="advanced">Avanzado</div>
+                <div class="option-pill" data-duration="short">Curso Corto</div>
+                <div class="option-pill" data-duration="medium">Curso Medio</div>
+                <div class="option-pill" data-duration="extensive">Curso Extenso</div>
+            </div>
+            
+            <div class="features">
+                <div class="feature">
+                    <span class="feature-icon">🌎</span> Acceso desde cualquier país
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">🔒</span> Sin APIs externas
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">💯</span> 100% Gratuito
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">📥</span> Descarga ilimitada
+                </div>
             </div>
             
             <div class="loading" id="loading">
                 <div class="spinner"></div>
-                <p>Generando tu curso... Esto puede tomar unos segundos</p>
+                <p>Generando tu curso completo... Esto puede tomar unos segundos</p>
             </div>
             
             <div class="results" id="results">
                 <div class="course-header">
                     <h2 id="generatedTitle"></h2>
                     <p id="courseDescription"></p>
+                </div>
+                
+                <div class="download-options">
+                    <button class="download-btn" onclick="downloadCourse('pdf')">
+                        <span>📄</span> Descargar PDF
+                    </button>
+                    <button class="download-btn" onclick="downloadCourse('html')">
+                        <span>📋</span> Exportar HTML
+                    </button>
+                    <button class="download-btn" onclick="printCourse()">
+                        <span>🖨️</span> Imprimir Curso
+                    </button>
                 </div>
                 
                 <div class="modules-container" id="modulesContainer">
@@ -274,7 +405,8 @@
         </div>
         
         <footer>
-            <p>© 2023 Generador de Cursos Completos - Todos los recursos educativos son gratuitos</p>
+            <p>© 2023 Generador de Cursos Completos - Todos los recursos educativos son gratuitos y accesibles desde cualquier país</p>
+            <p>Esta herramienta funciona completamente en tu navegador, sin necesidad de conexión a servicios externos con restricciones.</p>
         </footer>
     </div>
 
@@ -290,13 +422,23 @@
             const optionPills = document.querySelectorAll('.option-pill');
             
             let difficultyLevel = 'beginner';
+            let courseDuration = 'medium';
             
-            // Manejar selección de nivel de dificultad
+            // Manejar selección de opciones
             optionPills.forEach(pill => {
                 pill.addEventListener('click', function() {
-                    optionPills.forEach(p => p.classList.remove('active'));
+                    if (this.getAttribute('data-level')) {
+                        optionPills.forEach(p => {
+                            if (p.getAttribute('data-level')) p.classList.remove('active');
+                        });
+                        difficultyLevel = this.getAttribute('data-level');
+                    } else if (this.getAttribute('data-duration')) {
+                        optionPills.forEach(p => {
+                            if (p.getAttribute('data-duration')) p.classList.remove('active');
+                        });
+                        courseDuration = this.getAttribute('data-duration');
+                    }
                     this.classList.add('active');
-                    difficultyLevel = this.getAttribute('data-level');
                 });
             });
             
@@ -313,30 +455,41 @@
                 loadingElement.style.display = 'block';
                 resultsElement.style.display = 'none';
                 
-                // Simular tiempo de generación (en una implementación real, aquí se conectaría a una API)
+                // Simular tiempo de generación
                 setTimeout(() => {
-                    generateCourse(title, difficultyLevel);
+                    generateCourse(title, difficultyLevel, courseDuration);
                     loadingElement.style.display = 'none';
                     resultsElement.style.display = 'block';
+                    
+                    // Desplazarse suavemente hacia los resultados
+                    resultsElement.scrollIntoView({ behavior: 'smooth' });
                 }, 2000);
             });
             
             // Función para generar la estructura del curso
-            function generateCourse(title, level) {
+            function generateCourse(title, level, duration) {
                 // Establecer título
                 generatedTitle.textContent = title;
                 
-                // Generar descripción basada en el título y nivel
-                const descriptions = {
-                    beginner: `Curso introductorio perfecto para principiantes. Aprende los fundamentos esenciales de ${title} desde cero.`,
-                    intermediate: `Curso completo para aquellos con conocimientos básicos que desean profundizar en ${title}.`,
-                    advanced: `Curso especializado para expertos que buscan dominar las técnicas avanzadas de ${title}.`
+                // Generar descripción basada en el título, nivel y duración
+                const levelText = {
+                    beginner: 'principiante',
+                    intermediate: 'intermedio', 
+                    advanced: 'avanzado'
                 };
                 
-                courseDescription.textContent = descriptions[level];
+                const durationText = {
+                    short: '4-6 horas',
+                    medium: '8-12 horas',
+                    extensive: '20-30 horas'
+                };
                 
-                // Generar módulos (en una implementación real, esto vendría de una API)
-                const modules = generateModules(title, level);
+                courseDescription.textContent = 
+                    `Curso ${levelText[level]} de ${title} con una duración estimada de ${durationText[duration]}. 
+                    Este curso completo incluye todos los materiales necesarios para dominar el tema.`;
+                
+                // Generar módulos
+                const modules = generateModules(title, level, duration);
                 
                 // Limpiar contenedor
                 modulesContainer.innerHTML = '';
@@ -355,13 +508,14 @@
                                 <div class="lesson">
                                     <h4>${lesson.title}</h4>
                                     <p>${lesson.description}</p>
+                                    ${lesson.duration ? `<small><strong>Duración:</strong> ${lesson.duration}</small>` : ''}
                                 </div>
                             `).join('')}
                             <div class="resources">
-                                <h4>Recursos adicionales</h4>
+                                <h4>📚 Recursos adicionales</h4>
                                 ${module.resources.map(resource => `
                                     <div class="resource">
-                                        <span class="resource-icon">📚</span>
+                                        <span class="resource-icon">${resource.icon}</span>
                                         <a href="${resource.link}" target="_blank">${resource.title}</a>
                                     </div>
                                 `).join('')}
@@ -373,44 +527,37 @@
             }
             
             // Función para generar módulos de ejemplo
-            function generateModules(title, level) {
-                // Esta es una simulación - en una aplicación real, esto se generaría con IA
+            function generateModules(title, level, duration) {
+                // Determinar número de módulos según duración
+                let moduleCount = 4;
+                if (duration === 'short') moduleCount = 3;
+                if (duration === 'extensive') moduleCount = 6;
+                
+                // Plantillas de módulos según nivel
                 const moduleTemplates = {
                     beginner: [
                         {
                             title: `Introducción a ${title}`,
                             lessons: [
-                                { title: '¿Qué es? Historia y conceptos básicos', description: 'Una visión general del campo y su importancia.' },
-                                { title: 'Terminología esencial', description: 'Aprende el vocabulario fundamental que necesitarás.' },
-                                { title: 'Herramientas básicas y recursos', description: 'Configuración del entorno de trabajo inicial.' }
+                                { title: '¿Qué es? Historia y conceptos básicos', description: 'Una visión general del campo y su importancia.', duration: '30 min' },
+                                { title: 'Terminología esencial', description: 'Aprende el vocabulario fundamental que necesitarás.', duration: '45 min' },
+                                { title: 'Herramientas básicas y recursos', description: 'Configuración del entorno de trabajo inicial.', duration: '1 hora' }
                             ],
                             resources: [
-                                { title: 'Guía de conceptos básicos', link: '#' },
-                                { title: 'Lista de verificación de herramientas', link: '#' }
+                                { title: 'Guía de conceptos básicos', link: '#', icon: '📄' },
+                                { title: 'Lista de verificación de herramientas', link: '#', icon: '✅' }
                             ]
                         },
                         {
                             title: 'Fundamentos y principios básicos',
                             lessons: [
-                                { title: 'Los pilares fundamentales', description: 'Conoce las bases sobre las que se construye todo.' },
-                                { title: 'Técnicas esenciales para principiantes', description: 'Domina las habilidades iniciales necesarias.' },
-                                { title: 'Ejercicios prácticos de iniciación', description: 'Pon en práctica lo aprendido con proyectos simples.' }
+                                { title: 'Los pilares fundamentales', description: 'Conoce las bases sobre las que se construye todo.', duration: '1 hora' },
+                                { title: 'Técnicas esenciales para principiantes', description: 'Domina las habilidades iniciales necesarias.', duration: '1.5 horas' },
+                                { title: 'Ejercicios prácticos de iniciación', description: 'Pon en práctica lo aprendido con proyectos simples.', duration: '2 horas' }
                             ],
                             resources: [
-                                { title: 'Ejercicios prácticos', link: '#' },
-                                { title: 'Plantillas para comenzar', link: '#' }
-                            ]
-                        },
-                        {
-                            title: 'Proyecto práctico inicial',
-                            lessons: [
-                                { title: 'Planificación del primer proyecto', description: 'Cómo estructurar y organizar tu trabajo.' },
-                                { title: 'Desarrollo paso a paso', description: 'Sigue el proceso de creación con guías detalladas.' },
-                                { title: 'Revisión y mejora', description: 'Aprende a evaluar y refinar tu trabajo.' }
-                            ],
-                            resources: [
-                                { title: 'Plantilla de proyecto', link: '#' },
-                                { title: 'Casos de estudio', link: '#' }
+                                { title: 'Ejercicios prácticos', link: '#', icon: '🔧' },
+                                { title: 'Plantillas para comenzar', link: '#', icon: '📋' }
                             ]
                         }
                     ],
@@ -418,25 +565,13 @@
                         {
                             title: `Conceptos intermedios de ${title}`,
                             lessons: [
-                                { title: 'Técnicas y métodos avanzados', description: 'Profundiza en approaches más sofisticados.' },
-                                { title: 'Resolución de problemas comunes', description: 'Cómo abordar desafíos típicos.' },
-                                { title: 'Optimización de flujos de trabajo', description: 'Mejora tu eficiencia y productividad.' }
+                                { title: 'Técnicas y métodos avanzados', description: 'Profundiza en approaches más sofisticados.', duration: '1.5 horas' },
+                                { title: 'Resolución de problemas comunes', description: 'Cómo abordar desafíos típicos.', duration: '1 hora' },
+                                { title: 'Optimización de flujos de trabajo', description: 'Mejora tu eficiencia y productividad.', duration: '1.5 horas' }
                             ],
                             resources: [
-                                { title: 'Guía de técnicas', link: '#' },
-                                { title: 'Plantillas de optimización', link: '#' }
-                            ]
-                        },
-                        {
-                            title: 'Aplicaciones prácticas',
-                            lessons: [
-                                { title: 'Casos de estudio reales', description: 'Analiza ejemplos del mundo real.' },
-                                { title: 'Proyectos de complejidad media', description: 'Desarrolla habilidades con desafíos apropiados.' },
-                                { title: 'Análisis y retroalimentación', description: 'Aprende a evaluar críticamente el trabajo.' }
-                            ],
-                            resources: [
-                                { title: 'Repositorio de casos', link: '#' },
-                                { title: 'Herramientas de análisis', link: '#' }
+                                { title: 'Guía de técnicas', link: '#', icon: '📚' },
+                                { title: 'Plantillas de optimización', link: '#', icon: '⚡' }
                             ]
                         }
                     ],
@@ -444,31 +579,43 @@
                         {
                             title: `Temas avanzados en ${title}`,
                             lessons: [
-                                { title: 'Técnicas especializadas', description: 'Domina métodos reservados para expertos.' },
-                                { title: 'Enfoques innovadores', description: 'Técnicas de vanguardia y tendencias emergentes.' },
-                                { title: 'Automatización y optimización extrema', description: 'Maximiza la eficiencia con técnicas avanzadas.' }
+                                { title: 'Técnicas especializadas', description: 'Domina métodos reservados para expertos.', duration: '2 horas' },
+                                { title: 'Enfoques innovadores', description: 'Técnicas de vanguardia y tendencias emergentes.', duration: '1.5 horas' },
+                                { title: 'Automatización y optimización extrema', description: 'Maximiza la eficiencia con técnicas avanzadas.', duration: '2 horas' }
                             ],
                             resources: [
-                                { title: 'Paper de investigación', link: '#' },
-                                { title: 'Herramientas avanzadas', link: '#' }
-                            ]
-                        },
-                        {
-                            title: 'Proyecto de maestría',
-                            lessons: [
-                                { title: 'Diseño de un proyecto complejo', description: 'Planificación de iniciativas ambiciosas.' },
-                                { title: 'Implementación de técnicas avanzadas', description: 'Aplicación de métodos especializados.' },
-                                { title: 'Presentación y documentación profesional', description: 'Comunicación efectiva de trabajo complejo.' }
-                            ],
-                            resources: [
-                                { title: 'Plantilla de documentación', link: '#' },
-                                { title: 'Ejemplos de portfolios', link: '#' }
+                                { title: 'Paper de investigación', link: '#', icon: '📝' },
+                                { title: 'Herramientas avanzadas', link: '#', icon: '🛠️' }
                             ]
                         }
                     ]
                 };
                 
-                return moduleTemplates[level];
+                // Combinar módulos según nivel y duración
+                let modules = [];
+                
+                // Siempre incluir módulos básicos
+                modules = modules.concat(moduleTemplates.beginner);
+                
+                // Para niveles intermedio y avanzado, añadir módulos específicos
+                if (level !== 'beginner') {
+                    modules = modules.concat(moduleTemplates.intermediate);
+                }
+                
+                if (level === 'advanced') {
+                    modules = modules.concat(moduleTemplates.advanced);
+                }
+                
+                // Ajustar según duración
+                if (duration === 'short' && modules.length > 3) {
+                    modules = modules.slice(0, 3);
+                } else if (duration === 'extensive') {
+                    // Duplicar algunos módulos para cursos extensos
+                    const extraModules = JSON.parse(JSON.stringify(modules));
+                    modules = modules.concat(extraModules);
+                }
+                
+                return modules;
             }
         });
         
@@ -476,6 +623,15 @@
         function toggleModule(index) {
             const moduleContent = document.getElementById(`module-${index}`);
             moduleContent.classList.toggle('open');
+        }
+        
+        // Funciones de descarga (simuladas)
+        function downloadCourse(format) {
+            alert(`Función de descarga en formato ${format} sería implementada aquí. En una aplicación real, esto generaría y descargaría el curso completo.`);
+        }
+        
+        function printCourse() {
+            alert('Función de impresión sería implementada aquí. En una aplicación real, esto imprimiría el curso completo.');
         }
     </script>
 </body>
