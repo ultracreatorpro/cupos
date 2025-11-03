@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -83,6 +82,12 @@
             text-decoration: none;
             margin-left: 15px;
             font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-actions i {
+            margin-right: 5px;
         }
         
         /* Hero Section */
@@ -126,6 +131,10 @@
             margin-bottom: 10px;
         }
         
+        .popular-scroll-container {
+            position: relative;
+        }
+        
         .popular-scroll {
             display: flex;
             overflow-x: auto;
@@ -149,12 +158,13 @@
         }
         
         .popular-card {
-            min-width: 200px;
+            min-width: 180px;
             background-color: white;
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
             transition: transform 0.3s;
+            flex-shrink: 0;
         }
         
         .popular-card:hover {
@@ -162,23 +172,23 @@
         }
         
         .popular-img {
-            height: 150px;
+            height: 120px;
             width: 100%;
             object-fit: cover;
         }
         
         .popular-content {
-            padding: 15px;
+            padding: 12px;
         }
         
         .popular-title {
-            font-size: 16px;
+            font-size: 14px;
             margin-bottom: 5px;
             color: #232f3e;
         }
         
         .popular-price {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #ff9900;
         }
@@ -212,12 +222,6 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 20px;
             margin-bottom: 60px;
-        }
-        
-        @media (min-width: 768px) {
-            .products-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
         }
         
         .product-card {
@@ -261,34 +265,47 @@
         }
         
         .product-img {
-            height: 200px;
+            height: 160px;
             width: 100%;
             object-fit: cover;
         }
         
         .product-content {
-            padding: 20px;
+            padding: 15px;
         }
         
         .product-title {
-            font-size: 18px;
-            margin-bottom: 10px;
+            font-size: 16px;
+            margin-bottom: 8px;
             color: #232f3e;
         }
         
         .product-subtitle {
             color: #666;
-            font-size: 14px;
-            margin-bottom: 15px;
-            height: 60px;
+            font-size: 13px;
+            margin-bottom: 8px;
+            height: 40px;
             overflow: hidden;
         }
         
+        .product-location {
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .product-location i {
+            margin-right: 5px;
+            color: #ff9900;
+        }
+        
         .product-price {
-            font-size: 22px;
+            font-size: 18px;
             font-weight: bold;
             color: #ff9900;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
         
         .btn-whatsapp {
@@ -297,10 +314,11 @@
             background-color: #25D366;
             color: white;
             text-align: center;
-            padding: 12px;
+            padding: 10px;
             border-radius: 4px;
             text-decoration: none;
             font-weight: bold;
+            font-size: 14px;
             transition: background-color 0.3s;
         }
         
@@ -377,9 +395,15 @@
             .hero p {
                 font-size: 18px;
             }
-            
+        }
+        
+        @media (max-width: 480px) {
             .products-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .popular-card {
+                min-width: 150px;
             }
         }
     </style>
@@ -405,14 +429,24 @@
         </div>
     </header>
 
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Los Mejores Productos al Mejor Precio</h1>
+            <p>Descubre nuestra amplia selección de productos y compra directamente con el vendedor</p>
+        </div>
+    </section>
+
     <!-- Productos Populares -->
     <section class="popular-products">
         <div class="container">
             <div class="section-title">
-                <h2>Más Populares</h2>
+                <h2>Productos Más Populares</h2>
             </div>
-            <div class="popular-scroll" id="popular-scroll">
-                <!-- Los productos populares se generarán dinámicamente con JavaScript -->
+            <div class="popular-scroll-container">
+                <div class="popular-scroll" id="popular-scroll">
+                    <!-- Los productos populares se generarán dinámicamente con JavaScript -->
+                </div>
             </div>
         </div>
     </section>
@@ -420,12 +454,12 @@
     <!-- Categorías -->
     <section class="container">
         <div class="categories">
-            <div class="category active">Todos</div>
-            <div class="category">Electrónicos</div>
-            <div class="category">Hogar</div>
-            <div class="category">Moda</div>
-            <div class="category">Deportes</div>
-            <div class="category">Juguetes</div>
+            <div class="category active" data-category="all">Todos</div>
+            <div class="category" data-category="electronics">Electrónicos</div>
+            <div class="category" data-category="home">Hogar</div>
+            <div class="category" data-category="fashion">Moda</div>
+            <div class="category" data-category="sports">Deportes</div>
+            <div class="category" data-category="toys">Juguetes</div>
         </div>
     </section>
 
@@ -493,7 +527,8 @@
                 title: "Auriculares Inalámbricos",
                 subtitle: "Auriculares con cancelación de ruido, batería de larga duración y sonido de alta calidad.",
                 price: "$89.99",
-                popular: true
+                popular: true,
+                category: "electronics"
             },
             {
                 id: 2,
@@ -501,7 +536,8 @@
                 title: "Cámara Digital Profesional",
                 subtitle: "Cámara DSLR con lente intercambiable, 24.2 MP y grabación de video 4K.",
                 price: "$599.99",
-                popular: true
+                popular: true,
+                category: "electronics"
             },
             {
                 id: 3,
@@ -509,7 +545,8 @@
                 title: "Smartwatch Deportivo",
                 subtitle: "Reloj inteligente con monitor de frecuencia cardíaca, GPS y resistencia al agua.",
                 price: "$199.99",
-                popular: true
+                popular: true,
+                category: "electronics"
             },
             {
                 id: 4,
@@ -517,23 +554,8 @@
                 title: "Zapatillas Deportivas",
                 subtitle: "Zapatillas para running con amortiguación de aire y suela antideslizante.",
                 price: "$129.99",
-                popular: true
-            },
-            {
-                id: 5,
-                image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-                title: "Smartwatch Deportivo",
-                subtitle: "Reloj inteligente con monitor de frecuencia cardíaca, GPS y resistencia al agua.",
-                price: "$199.99",
-                popular: true
-            },
-            {
-                id: 6,
-                image: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-                title: "Zapatillas Deportivas",
-                subtitle: "Zapatillas para running con amortiguación de aire y suela antideslizante.",
-                price: "$129.99",
-                popular: true
+                popular: true,
+                category: "sports"
             }
         ];
 
@@ -556,7 +578,7 @@
         // Función para crear una tarjeta de producto
         function createProductCard(product) {
             return `
-                <div class="product-card" data-id="${product.id}">
+                <div class="product-card" data-id="${product.id}" data-category="${product.category}">
                     <button class="favorite-btn" data-id="${product.id}">
                         <i class="far fa-heart"></i>
                     </button>
@@ -564,6 +586,9 @@
                     <div class="product-content">
                         <h3 class="product-title">${product.title}</h3>
                         <p class="product-subtitle">${product.subtitle}</p>
+                        <div class="product-location">
+                            <i class="fas fa-map-marker-alt"></i> Habana
+                        </div>
                         <div class="product-price">${product.price}</div>
                         <a href="https://wa.me/1234567890?text=Hola,%20estoy%20interesado%20en%20el%20producto:%20${encodeURIComponent(product.title)}" 
                            class="btn-whatsapp" target="_blank">
@@ -585,12 +610,12 @@
         }
 
         // Función para renderizar los productos
-        function renderProducts() {
+        function renderProducts(filteredProducts = products) {
             const productsContainer = document.getElementById('products-container');
             productsContainer.innerHTML = '';
             
-            // Renderizar productos normales
-            products.forEach(product => {
+            // Renderizar productos
+            filteredProducts.forEach(product => {
                 productsContainer.innerHTML += createProductCard(product);
             });
             
@@ -598,6 +623,9 @@
             document.querySelectorAll('.favorite-btn').forEach(btn => {
                 btn.addEventListener('click', toggleFavorite);
             });
+            
+            // Cargar estado de favoritos
+            loadFavorites();
         }
 
         // Función para alternar favoritos
@@ -666,11 +694,56 @@
             });
         }
 
+        // Función para mostrar solo favoritos
+        function showFavorites() {
+            const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+            const favoriteProducts = products.filter(product => favorites.includes(product.id.toString()));
+            renderProducts(favoriteProducts);
+        }
+
+        // Función para filtrar por categoría
+        function filterByCategory(category) {
+            if (category === 'all') {
+                renderProducts(products);
+            } else {
+                const filteredProducts = products.filter(product => product.category === category);
+                renderProducts(filteredProducts);
+            }
+        }
+
+        // Auto-scroll para productos populares
+        let scrollInterval;
+        let currentScrollPosition = 0;
+        const scrollStep = 200; // Cantidad de píxeles a desplazar
+        const scrollDelay = 2000; // 2 segundos
+
+        function startAutoScroll() {
+            const popularScroll = document.getElementById('popular-scroll');
+            const maxScroll = popularScroll.scrollWidth - popularScroll.clientWidth;
+            
+            scrollInterval = setInterval(() => {
+                currentScrollPosition += scrollStep;
+                
+                // Si llegamos al final, volver al inicio
+                if (currentScrollPosition >= maxScroll) {
+                    currentScrollPosition = 0;
+                    popularScroll.scrollTo({
+                        left: 0,
+                        behavior: 'instant'
+                    });
+                } else {
+                    popularScroll.scrollTo({
+                        left: currentScrollPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            }, scrollDelay);
+        }
+
         // Inicializar la página
         document.addEventListener('DOMContentLoaded', function() {
             renderPopularProducts();
             renderProducts();
-            loadFavorites();
             
             // Agregar funcionalidad a las categorías
             const categories = document.querySelectorAll('.category');
@@ -678,6 +751,8 @@
                 category.addEventListener('click', function() {
                     categories.forEach(c => c.classList.remove('active'));
                     this.classList.add('active');
+                    const categoryValue = this.getAttribute('data-category');
+                    filterByCategory(categoryValue);
                 });
             });
             
@@ -689,28 +764,15 @@
                 }
             });
             
-            // Auto-scroll para productos populares
-            const popularScroll = document.getElementById('popular-scroll');
-            let scrollAmount = 0;
+            // Agregar funcionalidad al enlace de favoritos
+            document.getElementById('favorites-link').addEventListener('click', function(e) {
+                e.preventDefault();
+                showFavorites();
+            });
             
-            function autoScroll() {
-                scrollAmount += 1;
-                if (scrollAmount >= popularScroll.scrollWidth - popularScroll.clientWidth) {
-                    scrollAmount = 0;
-                }
-                popularScroll.scrollTo({
-                    left: scrollAmount,
-                    behavior: 'smooth'
-                });
-            }
-            
-            // Iniciar auto-scroll cada 3 segundos
-            setInterval(autoScroll, 3000);
+            // Iniciar auto-scroll
+            startAutoScroll();
         });
     </script>
 </body>
 </html>
-
-
-
-
