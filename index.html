@@ -3,19 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Cursos Completos - Sin Restricciones</title>
+    <title>Diseño de Interiores</title>
     <style>
-        :root {
-            --primary: #4361ee;
-            --secondary: #3a0ca3;
-            --accent: #f72585;
-            --light: #f8f9fa;
-            --dark: #212529;
-            --success: #4cc9f0;
-            --warning: #ff9e00;
-            --danger: #ef476f;
-        }
-        
+        /* Estilos generales */
         * {
             margin: 0;
             padding: 0;
@@ -24,692 +14,423 @@
         }
         
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: var(--dark);
+            background-color: #f9f9f9;
+            color: #333;
             line-height: 1.6;
-            min-height: 100vh;
-            padding: 20px;
         }
         
         .container {
+            width: 90%;
             max-width: 1200px;
             margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            padding: 0 15px;
         }
         
+        /* Header */
         header {
-            text-align: center;
-            padding: 40px 20px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
         
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-        
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            margin-bottom: 20px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .badge {
-            display: inline-block;
-            background-color: var(--accent);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            margin: 0 5px;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        .generator-box {
-            padding: 30px;
-            background: white;
-        }
-        
-        .input-group {
-            display: flex;
-            margin-bottom: 20px;
-            border-radius: 50px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        input[type="text"] {
-            flex: 1;
-            padding: 18px 25px;
-            border: none;
-            background: #f5f7ff;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-        
-        input[type="text"]:focus {
-            outline: none;
-            background: #eef1ff;
-        }
-        
-        button {
-            padding: 18px 30px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        button:hover {
-            background-color: var(--secondary);
-        }
-        
-        .options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-            justify-content: center;
-        }
-        
-        .option-pill {
-            padding: 10px 20px;
-            background-color: #e9ecef;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .option-pill:hover {
-            background-color: #dee2e6;
-        }
-        
-        .option-pill.active {
-            background-color: var(--primary);
-            color: white;
-        }
-        
-        .features {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 15px;
-            margin: 30px 0;
-        }
-        
-        .feature {
-            display: flex;
-            align-items: center;
-            background: #f8f9fa;
-            padding: 10px 20px;
-            border-radius: 50px;
-            font-size: 0.9rem;
-        }
-        
-        .feature-icon {
-            margin-right: 8px;
-            color: var(--primary);
-        }
-        
-        .results {
-            display: none;
-            margin-top: 30px;
-            padding: 20px;
-            border-top: 1px solid #eee;
-        }
-        
-        .course-header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: linear-gradient(to right, #f8f9fa, #e9ecef);
-            border-radius: 10px;
-        }
-        
-        .modules-container {
-            display: grid;
-            gap: 20px;
-        }
-        
-        .module {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e9ecef;
-        }
-        
-        .module-header {
-            padding: 18px 20px;
-            background: linear-gradient(to right, #4cc9f0, #4361ee);
-            color: white;
+        .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            cursor: pointer;
-            transition: all 0.3s;
+            padding: 20px 0;
         }
         
-        .module-header:hover {
-            background: linear-gradient(to right, #3a0ca3, #4361ee);
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
         }
         
-        .module-content {
-            padding: 0 20px;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-out, padding 0.3s ease;
+        .logo span {
+            color: #e67e22;
         }
         
-        .module-content.open {
-            padding: 20px;
-            max-height: 5000px;
-        }
-        
-        .lesson {
-            padding: 15px 0;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .lesson:last-child {
-            border-bottom: none;
-        }
-        
-        .resources {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px dashed #eee;
-        }
-        
-        .resource {
+        nav ul {
             display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
+            list-style: none;
         }
         
-        .resource-icon {
-            margin-right: 10px;
-            color: var(--primary);
-            font-size: 1.2rem;
+        nav ul li {
+            margin-left: 25px;
         }
         
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 40px;
+        nav ul li a {
+            text-decoration: none;
+            color: #2c3e50;
+            font-weight: 500;
+            transition: color 0.3s;
         }
         
-        .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left-color: var(--primary);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+        nav ul li a:hover {
+            color: #e67e22;
         }
         
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .download-options {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 30px 0;
-        }
-        
-        .download-btn {
-            padding: 12px 25px;
-            background-color: var(--success);
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
             color: white;
-            border: none;
+            text-align: center;
+            padding: 120px 0;
+            margin-bottom: 60px;
+        }
+        
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .hero p {
+            font-size: 20px;
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: #e67e22;
+            color: white;
+            padding: 12px 30px;
             border-radius: 5px;
-            cursor: pointer;
+            text-decoration: none;
             font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
+            transition: background-color 0.3s;
         }
         
-        .download-btn:hover {
-            background-color: #3aa5d3;
-            transform: translateY(-2px);
+        .btn:hover {
+            background-color: #d35400;
         }
         
-        footer {
+        /* Sección de tarjetas */
+        .section-title {
             text-align: center;
-            margin-top: 50px;
+            margin-bottom: 50px;
+        }
+        
+        .section-title h2 {
+            font-size: 36px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .section-title p {
+            color: #7f8c8d;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        
+        .card-img {
+            height: 200px;
+            width: 100%;
+            object-fit: cover;
+        }
+        
+        .card-content {
+            padding: 20px;
+        }
+        
+        .card h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .card p {
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+        
+        /* Formulario para agregar imágenes */
+        .add-image-form {
+            background-color: white;
             padding: 30px;
-            color: #6c757d;
-            font-size: 0.9rem;
-            background: #f8f9fa;
-            border-top: 1px solid #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 60px;
         }
         
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            background: var(--success);
-            color: white;
+        .add-image-form h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
             border-radius: 5px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            transform: translateX(200%);
-            transition: transform 0.3s ease;
-            z-index: 1000;
+            font-size: 16px;
         }
         
-        .notification.show {
-            transform: translateX(0);
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
         }
         
+        /* Footer */
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .social-links {
+            margin: 20px 0;
+        }
+        
+        .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            color: white;
+            font-size: 20px;
+        }
+        
+        .copyright {
+            margin-top: 20px;
+            color: #bdc3c7;
+        }
+        
+        /* Responsive */
         @media (max-width: 768px) {
-            .input-group {
+            .header-content {
                 flex-direction: column;
-                border-radius: 10px;
+                text-align: center;
             }
             
-            input[type="text"] {
-                border-radius: 10px 10px 0 0;
-            }
-            
-            button {
-                border-radius: 0 0 10px 10px;
-            }
-            
-            .download-options {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .download-btn {
-                width: 100%;
-                max-width: 300px;
+            nav ul {
+                margin-top: 20px;
                 justify-content: center;
+            }
+            
+            nav ul li {
+                margin: 0 10px;
+            }
+            
+            .hero h1 {
+                font-size: 36px;
+            }
+            
+            .hero p {
+                font-size: 18px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Generador de Cursos Completos</h1>
-            <p class="subtitle">Ingresa un título y obtén un curso completo al instante - Totalmente gratis 
-                <span class="badge">Sin restricciones de países</span>
-                <span class="badge">Sin APIs bloqueadas</span>
-            </p>
-        </header>
-        
-        <div class="generator-box">
-            <div class="input-group">
-                <input type="text" id="courseTitle" placeholder="Ej: Introducción a la Programación Web, Marketing Digital, Fotografía Básica...">
-                <button id="generateBtn">Generar Curso</button>
-            </div>
-            
-            <div class="options">
-                <div class="option-pill active" data-level="beginner">Principiante</div>
-                <div class="option-pill" data-level="intermediate">Intermedio</div>
-                <div class="option-pill" data-level="advanced">Avanzado</div>
-                <div class="option-pill active" data-duration="medium">Duración Media</div>
-                <div class="option-pill" data-duration="short">Curso Corto</div>
-                <div class="option-pill" data-duration="extensive">Curso Extenso</div>
-            </div>
-            
-            <div class="features">
-                <div class="feature">
-                    <span class="feature-icon">🌎</span> Acceso desde cualquier país
-                </div>
-                <div class="feature">
-                    <span class="feature-icon">🔒</span> Sin APIs externas
-                </div>
-                <div class="feature">
-                    <span class="feature-icon">💯</span> 100% Gratuito
-                </div>
-                <div class="feature">
-                    <span class="feature-icon">📥</span> Descarga ilimitada
-                </div>
-            </div>
-            
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p>Generando tu curso completo... Esto puede tomar unos segundos</p>
-            </div>
-            
-            <div class="results" id="results">
-                <div class="course-header">
-                    <h2 id="generatedTitle"></h2>
-                    <p id="courseDescription"></p>
-                </div>
-                
-                <div class="download-options">
-                    <button class="download-btn" onclick="downloadCourse('txt')">
-                        <span>📄</span> Descargar TXT
-                    </button>
-                    <button class="download-btn" onclick="downloadCourse('html')">
-                        <span>📋</span> Exportar HTML
-                    </button>
-                    <button class="download-btn" onclick="window.print()">
-                        <span>🖨️</span> Imprimir Curso
-                    </button>
-                </div>
-                
-                <div class="modules-container" id="modulesContainer">
-                    <!-- Los módulos se insertarán aquí mediante JavaScript -->
-                </div>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Diseño<span>Interiores</span></div>
+                <nav>
+                    <ul>
+                        <li><a href="#inicio">Inicio</a></li>
+                        <li><a href="#proyectos">Proyectos</a></li>
+                        <li><a href="#servicios">Servicios</a></li>
+                        <li><a href="#contacto">Contacto</a></li>
+                    </ul>
+                </nav>
             </div>
         </div>
-        
-        <footer>
-            <p>© 2023 Generador de Cursos Completos - Todos los recursos educativos son gratuitos y accesibles desde cualquier país</p>
-            <p>Esta herramienta funciona completamente en tu navegador, sin necesidad de conexión a servicios externos con restricciones.</p>
-        </footer>
-    </div>
+    </header>
 
-    <div class="notification" id="notification">Curso generado con éxito!</div>
+    <!-- Hero Section -->
+    <section class="hero" id="inicio">
+        <div class="container">
+            <h1>Transformamos tus espacios</h1>
+            <p>Diseño de interiores personalizado para crear ambientes únicos que reflejen tu estilo de vida</p>
+            <a href="#proyectos" class="btn">Ver Proyectos</a>
+        </div>
+    </section>
+
+    <!-- Sección de proyectos -->
+    <section id="proyectos">
+        <div class="container">
+            <div class="section-title">
+                <h2>Nuestros Proyectos</h2>
+                <p>Explora algunos de nuestros trabajos más recientes en diseño de interiores</p>
+            </div>
+            
+            <div class="cards-container" id="cards-container">
+                <!-- Las tarjetas se generarán dinámicamente con JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Formulario para agregar imágenes -->
+    <section id="agregar-imagen">
+        <div class="container">
+            <div class="section-title">
+                <h2>Agregar Nuevo Proyecto</h2>
+                <p>Comparte tu proyecto de diseño de interiores con nosotros</p>
+            </div>
+            
+            <div class="add-image-form">
+                <h3>Agregar nueva imagen</h3>
+                <form id="image-form">
+                    <div class="form-group">
+                        <label for="image-url">Enlace de la imagen</label>
+                        <input type="url" id="image-url" placeholder="https://ejemplo.com/imagen.jpg" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="image-title">Título del proyecto</label>
+                        <input type="text" id="image-title" placeholder="Sala de estar moderna" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="image-description">Descripción</label>
+                        <textarea id="image-description" placeholder="Describe el proyecto..."></textarea>
+                    </div>
+                    <button type="submit" class="btn">Agregar Proyecto</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contacto">
+        <div class="container">
+            <div class="footer-content">
+                <div class="logo">Diseño<span>Interiores</span></div>
+                <div class="social-links">
+                    <a href="#">Facebook</a>
+                    <a href="#">Instagram</a>
+                    <a href="#">Pinterest</a>
+                </div>
+                <p class="copyright">&copy; 2023 Diseño Interiores. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
 
     <script>
+        // Array inicial de proyectos
+        const initialProjects = [
+            {
+                imageUrl: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                title: "Sala de Estar Contemporánea",
+                description: "Diseño moderno con acentos en madera y tonos neutros"
+            },
+            {
+                imageUrl: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                title: "Cocina Minimalista",
+                description: "Espacios funcionales con líneas limpias y materiales de alta calidad"
+            },
+            {
+                imageUrl: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                title: "Dormitorio Principal",
+                description: "Ambiente acogedor con iluminación cálida y texturas suaves"
+            }
+        ];
+
+        // Función para crear una tarjeta
+        function createCard(project) {
+            return `
+                <div class="card">
+                    <img src="${project.imageUrl}" alt="${project.title}" class="card-img">
+                    <div class="card-content">
+                        <h3>${project.title}</h3>
+                        <p>${project.description}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Función para renderizar las tarjetas
+        function renderCards() {
+            const cardsContainer = document.getElementById('cards-container');
+            cardsContainer.innerHTML = '';
+            
+            // Obtener proyectos del localStorage o usar los iniciales
+            const projects = JSON.parse(localStorage.getItem('projects')) || initialProjects;
+            
+            projects.forEach(project => {
+                cardsContainer.innerHTML += createCard(project);
+            });
+        }
+
+        // Función para agregar un nuevo proyecto
+        function addProject(event) {
+            event.preventDefault();
+            
+            const imageUrl = document.getElementById('image-url').value;
+            const title = document.getElementById('image-title').value;
+            const description = document.getElementById('image-description').value;
+            
+            const newProject = {
+                imageUrl,
+                title,
+                description
+            };
+            
+            // Obtener proyectos existentes
+            const projects = JSON.parse(localStorage.getItem('projects')) || initialProjects;
+            
+            // Agregar el nuevo proyecto
+            projects.push(newProject);
+            
+            // Guardar en localStorage
+            localStorage.setItem('projects', JSON.stringify(projects));
+            
+            // Volver a renderizar las tarjetas
+            renderCards();
+            
+            // Limpiar el formulario
+            document.getElementById('image-form').reset();
+            
+            alert('Proyecto agregado exitosamente!');
+        }
+
+        // Inicializar la página
         document.addEventListener('DOMContentLoaded', function() {
-            const generateBtn = document.getElementById('generateBtn');
-            const courseTitleInput = document.getElementById('courseTitle');
-            const loadingElement = document.getElementById('loading');
-            const resultsElement = document.getElementById('results');
-            const generatedTitle = document.getElementById('generatedTitle');
-            const courseDescription = document.getElementById('courseDescription');
-            const modulesContainer = document.getElementById('modulesContainer');
-            const optionPills = document.querySelectorAll('.option-pill');
-            const notification = document.getElementById('notification');
+            renderCards();
             
-            let difficultyLevel = 'beginner';
-            let courseDuration = 'medium';
-            
-            // Manejar selección de opciones
-            optionPills.forEach(pill => {
-                pill.addEventListener('click', function() {
-                    if (this.getAttribute('data-level')) {
-                        document.querySelectorAll('.option-pill[data-level]').forEach(p => {
-                            p.classList.remove('active');
-                        });
-                        difficultyLevel = this.getAttribute('data-level');
-                    } else if (this.getAttribute('data-duration')) {
-                        document.querySelectorAll('.option-pill[data-duration]').forEach(p => {
-                            p.classList.remove('active');
-                        });
-                        courseDuration = this.getAttribute('data-duration');
-                    }
-                    this.classList.add('active');
-                });
-            });
-            
-            // Generar curso al hacer clic en el botón
-            generateBtn.addEventListener('click', function() {
-                const title = courseTitleInput.value.trim();
-                
-                if (title === '') {
-                    showNotification('Por favor, ingresa un título para tu curso', 'error');
-                    return;
-                }
-                
-                // Mostrar carga
-                loadingElement.style.display = 'block';
-                resultsElement.style.display = 'none';
-                
-                // Simular tiempo de generación
-                setTimeout(() => {
-                    generateCourse(title, difficultyLevel, courseDuration);
-                    loadingElement.style.display = 'none';
-                    resultsElement.style.display = 'block';
-                    showNotification('Curso generado con éxito!');
-                    
-                    // Desplazarse suavemente hacia los resultados
-                    resultsElement.scrollIntoView({ behavior: 'smooth' });
-                }, 2000);
-            });
-            
-            // Función para mostrar notificaciones
-            function showNotification(message, type = 'success') {
-                notification.textContent = message;
-                notification.style.backgroundColor = type === 'success' ? 'var(--success)' : 'var(--danger)';
-                notification.classList.add('show');
-                
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                }, 3000);
-            }
-            
-            // Función para generar la estructura del curso
-            function generateCourse(title, level, duration) {
-                // Establecer título
-                generatedTitle.textContent = title;
-                
-                // Generar descripción basada en el título, nivel y duración
-                const levelText = {
-                    beginner: 'principiante',
-                    intermediate: 'intermedio', 
-                    advanced: 'avanzado'
-                };
-                
-                const durationText = {
-                    short: '4-6 horas',
-                    medium: '8-12 horas',
-                    extensive: '20-30 horas'
-                };
-                
-                courseDescription.textContent = 
-                    `Curso ${levelText[level]} de ${title} con una duración estimada de ${durationText[duration]}. 
-                    Este curso completo incluye todos los materiales necesarios para dominar el tema.`;
-                
-                // Generar módulos
-                const modules = generateModules(title, level, duration);
-                
-                // Limpiar contenedor
-                modulesContainer.innerHTML = '';
-                
-                // Añadir módulos al DOM
-                modules.forEach((module, index) => {
-                    const moduleElement = document.createElement('div');
-                    moduleElement.className = 'module';
-                    moduleElement.innerHTML = `
-                        <div class="module-header" onclick="toggleModule(${index})">
-                            <h3>${module.title}</h3>
-                            <span>${module.lessons.length} lecciones</span>
-                        </div>
-                        <div class="module-content" id="module-${index}">
-                            ${module.lessons.map(lesson => `
-                                <div class="lesson">
-                                    <h4>${lesson.title}</h4>
-                                    <p>${lesson.description}</p>
-                                    ${lesson.duration ? `<small><strong>Duración:</strong> ${lesson.duration}</small>` : ''}
-                                </div>
-                            `).join('')}
-                            <div class="resources">
-                                <h4>📚 Recursos adicionales</h4>
-                                ${module.resources.map(resource => `
-                                    <div class="resource">
-                                        <span class="resource-icon">${resource.icon}</span>
-                                        <a href="${resource.link}" target="_blank">${resource.title}</a>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `;
-                    modulesContainer.appendChild(moduleElement);
-                });
-                
-                // Expandir el primer módulo por defecto
-                setTimeout(() => {
-                    toggleModule(0);
-                }, 100);
-            }
-            
-            // Función para generar módulos de ejemplo
-            function generateModules(title, level, duration) {
-                // Determinar número de módulos según duración
-                let moduleCount = 4;
-                if (duration === 'short') moduleCount = 3;
-                if (duration === 'extensive') moduleCount = 6;
-                
-                // Plantillas de módulos según nivel
-                const moduleTemplates = {
-                    beginner: [
-                        {
-                            title: `Introducción a ${title}`,
-                            lessons: [
-                                { title: '¿Qué es? Historia y conceptos básicos', description: 'Una visión general del campo y su importancia.', duration: '30 min' },
-                                { title: 'Terminología esencial', description: 'Aprende el vocabulario fundamental que necesitarás.', duration: '45 min' },
-                                { title: 'Herramientas básicas y recursos', description: 'Configuración del entorno de trabajo inicial.', duration: '1 hora' }
-                            ],
-                            resources: [
-                                { title: 'Guía de conceptos básicos', link: '#', icon: '📄' },
-                                { title: 'Lista de verificación de herramientas', link: '#', icon: '✅' }
-                            ]
-                        },
-                        {
-                            title: 'Fundamentos y principios básicos',
-                            lessons: [
-                                { title: 'Los pilares fundamentales', description: 'Conoce las bases sobre las que se construye todo.', duration: '1 hora' },
-                                { title: 'Técnicas esenciales para principiantes', description: 'Domina las habilidades iniciales necesarias.', duration: '1.5 horas' },
-                                { title: 'Ejercicios prácticos de iniciación', description: 'Pon en práctica lo aprendido con proyectos simples.', duration: '2 horas' }
-                            ],
-                            resources: [
-                                { title: 'Ejercicios prácticos', link: '#', icon: '🔧' },
-                                { title: 'Plantillas para comenzar', link: '#', icon: '📋' }
-                            ]
-                        }
-                    ],
-                    intermediate: [
-                        {
-                            title: `Conceptos intermedios de ${title}`,
-                            lessons: [
-                                { title: 'Técnicas y métodos avanzados', description: 'Profundiza en approaches más sofisticados.', duration: '1.5 horas' },
-                                { title: 'Resolución de problemas comunes', description: 'Cómo abordar desafíos típicos.', duration: '1 hora' },
-                                { title: 'Optimización de flujos de trabajo', description: 'Mejora tu eficiencia y productividad.', duration: '1.5 hours' }
-                            ],
-                            resources: [
-                                { title: 'Guía de técnicas', link: '#', icon: '📚' },
-                                { title: 'Plantillas de optimización', link: '#', icon: '⚡' }
-                            ]
-                        }
-                    ],
-                    advanced: [
-                        {
-                            title: `Temas avanzados en ${title}`,
-                            lessons: [
-                                { title: 'Técnicas especializadas', description: 'Domina métodos reservados para expertos.', duration: '2 horas' },
-                                { title: 'Enfoques innovadores', description: 'Técnicas de vanguardia y tendencias emergentes.', duration: '1.5 horas' },
-                                { title: 'Automatización y optimización extrema', description: 'Maximiza la eficiencia con técnicas avanzadas.', duration: '2 horas' }
-                            ],
-                            resources: [
-                                { title: 'Paper de investigación', link: '#', icon: '📝' },
-                                { title: 'Herramientas avanzadas', link: '#', icon: '🛠️' }
-                            ]
-                        }
-                    ]
-                };
-                
-                // Combinar módulos según nivel y duración
-                let modules = [];
-                
-                // Siempre incluir módulos básicos
-                modules = modules.concat(moduleTemplates.beginner);
-                
-                // Para niveles intermedio y avanzado, añadir módulos específicos
-                if (level !== 'beginner') {
-                    modules = modules.concat(moduleTemplates.intermediate);
-                }
-                
-                if (level === 'advanced') {
-                    modules = modules.concat(moduleTemplates.advanced);
-                }
-                
-                // Ajustar según duración
-                if (duration === 'short' && modules.length > 3) {
-                    modules = modules.slice(0, 3);
-                } else if (duration === 'extensive') {
-                    // Duplicar algunos módulos para cursos extensos
-                    const extraModules = JSON.parse(JSON.stringify(modules.slice(0, 2)));
-                    modules = modules.concat(extraModules);
-                }
-                
-                return modules;
-            }
+            // Agregar evento al formulario
+            document.getElementById('image-form').addEventListener('submit', addProject);
         });
-        
-        // Función global para alternar módulos (necesaria para el onclick)
-        function toggleModule(index) {
-            const moduleContent = document.getElementById(`module-${index}`);
-            moduleContent.classList.toggle('open');
-        }
-        
-        // Funciones de descarga
-        function downloadCourse(format) {
-            const title = document.getElementById('generatedTitle').textContent;
-            let content = "";
-            
-            if (format === 'txt') {
-                content = `Curso: ${title}\n`;
-                content += `Descripción: ${document.getElementById('courseDescription').textContent}\n\n`;
-                
-                const modules = document.querySelectorAll('.module');
-                modules.forEach((module, index) => {
-                    const moduleTitle = module.querySelector('.module-header h3').textContent;
-                    content += `Módulo ${index + 1}: ${moduleTitle}\n`;
-                    
-                    const lessons = module.querySelectorAll('.lesson');
-                    lessons.forEach((lesson, lessonIndex) => {
-                        const lessonTitle = lesson.querySelector('h4').textContent;
-                        const lessonDesc = lesson.querySelector('p').textContent;
-                        content += `  Lección ${lessonIndex + 1}: ${lessonTitle}\n`;
-                        content += `    ${lessonDesc}\n`;
-                    });
-                    
-                    content += '\n';
-                });
-                
-                downloadFile(content, `${title.replace(/\s+/g, '_')}.txt`, 'text/plain');
-                
-            } else if (format === 'html') {
-                content = `<html><head><title>${title}</title></head><body>`;
-                content += `<h1>${title}</h1>`;
-                content += `<p>${document.getElementById('courseDescription').textContent}</p>`;
-                content += document.getElementById('modulesContainer').innerHTML;
-                content += '</body></html>';
-                
-                downloadFile(content, `${title.replace(/\s+/g, '_')}.html`, 'text/html');
-            }
-        }
-        
-        function downloadFile(content, fileName, contentType) {
-            const blob = new Blob([content], { type: contentType });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
     </script>
 </body>
 </html>
