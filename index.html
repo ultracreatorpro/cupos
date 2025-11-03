@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diseño de Interiores</title>
+    <title>Compra y Vende en Cuba</title>
     <style>
         /* Estilos generales */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
         }
         
         body {
-            background-color: #f9f9f9;
+            background-color: #f5f5f5;
             color: #333;
             line-height: 1.6;
         }
@@ -29,27 +29,20 @@
         /* Header */
         header {
             background-color: #fff;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 15px 0;
         }
         
         .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 0;
         }
         
         .logo {
             font-size: 24px;
-            font-weight: 700;
+            font-weight: bold;
             color: #2c3e50;
-        }
-        
-        .logo span {
-            color: #e67e22;
         }
         
         nav ul {
@@ -58,93 +51,60 @@
         }
         
         nav ul li {
-            margin-left: 25px;
+            margin-left: 20px;
         }
         
         nav ul li a {
             text-decoration: none;
             color: #2c3e50;
             font-weight: 500;
-            transition: color 0.3s;
-        }
-        
-        nav ul li a:hover {
-            color: #e67e22;
         }
         
         /* Hero Section */
         .hero {
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
-            background-size: cover;
-            background-position: center;
-            color: white;
+            background-color: #e9ecef;
+            padding: 60px 0;
             text-align: center;
-            padding: 120px 0;
-            margin-bottom: 60px;
+            margin-bottom: 40px;
         }
         
         .hero h1 {
-            font-size: 48px;
+            font-size: 36px;
             margin-bottom: 20px;
+            color: #2c3e50;
         }
         
         .hero p {
-            font-size: 20px;
+            font-size: 18px;
             max-width: 700px;
-            margin: 0 auto 30px;
-        }
-        
-        .btn {
-            display: inline-block;
-            background-color: #e67e22;
-            color: white;
-            padding: 12px 30px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: background-color 0.3s;
-        }
-        
-        .btn:hover {
-            background-color: #d35400;
+            margin: 0 auto;
+            color: #555;
         }
         
         /* Sección de tarjetas */
         .section-title {
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 40px;
         }
         
         .section-title h2 {
-            font-size: 36px;
+            font-size: 30px;
             color: #2c3e50;
-            margin-bottom: 15px;
-        }
-        
-        .section-title p {
-            color: #7f8c8d;
-            max-width: 600px;
-            margin: 0 auto;
+            margin-bottom: 10px;
         }
         
         .cards-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
             margin-bottom: 60px;
         }
         
         .card {
             background-color: white;
-            border-radius: 8px;
+            border-radius: 5px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        
-        .card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
         }
         
         .card-img {
@@ -158,22 +118,22 @@
         }
         
         .card h3 {
-            font-size: 20px;
+            font-size: 18px;
             margin-bottom: 10px;
             color: #2c3e50;
         }
         
         .card p {
-            color: #7f8c8d;
-            margin-bottom: 15px;
+            color: #666;
+            font-size: 14px;
         }
         
         /* Formulario para agregar imágenes */
         .add-image-form {
             background-color: white;
             padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
             margin-bottom: 60px;
         }
         
@@ -192,24 +152,32 @@
             font-weight: 500;
         }
         
-        .form-group input, .form-group textarea {
+        .form-group input {
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
-            border-radius: 5px;
+            border-radius: 4px;
+        }
+        
+        .btn {
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
             font-size: 16px;
         }
         
-        .form-group textarea {
-            height: 100px;
-            resize: vertical;
+        .btn:hover {
+            background-color: #1a252f;
         }
         
         /* Footer */
         footer {
             background-color: #2c3e50;
             color: white;
-            padding: 40px 0;
+            padding: 30px 0;
             text-align: center;
         }
         
@@ -227,12 +195,12 @@
             display: inline-block;
             margin: 0 10px;
             color: white;
-            font-size: 20px;
         }
         
         .copyright {
             margin-top: 20px;
             color: #bdc3c7;
+            font-size: 14px;
         }
         
         /* Responsive */
@@ -243,7 +211,7 @@
             }
             
             nav ul {
-                margin-top: 20px;
+                margin-top: 15px;
                 justify-content: center;
             }
             
@@ -252,11 +220,11 @@
             }
             
             .hero h1 {
-                font-size: 36px;
+                font-size: 28px;
             }
             
             .hero p {
-                font-size: 18px;
+                font-size: 16px;
             }
         }
     </style>
@@ -266,12 +234,11 @@
     <header>
         <div class="container">
             <div class="header-content">
-                <div class="logo">Diseño<span>Interiores</span></div>
+                <div class="logo">Compra y Vende en Cuba</div>
                 <nav>
                     <ul>
                         <li><a href="#inicio">Inicio</a></li>
-                        <li><a href="#proyectos">Proyectos</a></li>
-                        <li><a href="#servicios">Servicios</a></li>
+                        <li><a href="#galeria">Galería</a></li>
                         <li><a href="#contacto">Contacto</a></li>
                     </ul>
                 </nav>
@@ -282,18 +249,17 @@
     <!-- Hero Section -->
     <section class="hero" id="inicio">
         <div class="container">
-            <h1>Transformamos tus espacios</h1>
-            <p>Diseño de interiores personalizado para crear ambientes únicos que reflejen tu estilo de vida</p>
-            <a href="#proyectos" class="btn">Ver Proyectos</a>
+            <h1>Bienvenidos a nuestro espacio</h1>
+            <p>Compartimos imágenes y momentos especiales de nuestro patio cubano</p>
         </div>
     </section>
 
-    <!-- Sección de proyectos -->
-    <section id="proyectos">
+    <!-- Sección de galería -->
+    <section id="galeria">
         <div class="container">
             <div class="section-title">
-                <h2>Nuestros Proyectos</h2>
-                <p>Explora algunos de nuestros trabajos más recientes en diseño de interiores</p>
+                <h2>Nuestra Galería</h2>
+                <p>Momentos capturados en nuestro patio</p>
             </div>
             
             <div class="cards-container" id="cards-container">
@@ -306,26 +272,22 @@
     <section id="agregar-imagen">
         <div class="container">
             <div class="section-title">
-                <h2>Agregar Nuevo Proyecto</h2>
-                <p>Comparte tu proyecto de diseño de interiores con nosotros</p>
+                <h2>Agregar Nueva Imagen</h2>
+                <p>Comparte una imagen con nosotros mediante un enlace</p>
             </div>
             
             <div class="add-image-form">
-                <h3>Agregar nueva imagen</h3>
+                <h3>Agregar nueva imagen a la galería</h3>
                 <form id="image-form">
                     <div class="form-group">
                         <label for="image-url">Enlace de la imagen</label>
                         <input type="url" id="image-url" placeholder="https://ejemplo.com/imagen.jpg" required>
                     </div>
                     <div class="form-group">
-                        <label for="image-title">Título del proyecto</label>
-                        <input type="text" id="image-title" placeholder="Sala de estar moderna" required>
+                        <label for="image-title">Título de la imagen</label>
+                        <input type="text" id="image-title" placeholder="Título descriptivo" required>
                     </div>
-                    <div class="form-group">
-                        <label for="image-description">Descripción</label>
-                        <textarea id="image-description" placeholder="Describe el proyecto..."></textarea>
-                    </div>
-                    <button type="submit" class="btn">Agregar Proyecto</button>
+                    <button type="submit" class="btn">Agregar Imagen</button>
                 </form>
             </div>
         </div>
@@ -335,45 +297,40 @@
     <footer id="contacto">
         <div class="container">
             <div class="footer-content">
-                <div class="logo">Diseño<span>Interiores</span></div>
+                <div class="logo">El Patio de Mi Casa en Cuba</div>
                 <div class="social-links">
                     <a href="#">Facebook</a>
                     <a href="#">Instagram</a>
-                    <a href="#">Pinterest</a>
                 </div>
-                <p class="copyright">&copy; 2023 Diseño Interiores. Todos los derechos reservados.</p>
+                <p class="copyright">&copy; 2023 El Patio de Mi Casa en Cuba. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>
 
     <script>
-        // Array inicial de proyectos
-        const initialProjects = [
+        // Array inicial de imágenes
+        const initialImages = [
             {
-                imageUrl: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-                title: "Sala de Estar Contemporánea",
-                description: "Diseño moderno con acentos en madera y tonos neutros"
+                imageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                title: "Patio tradicional cubano"
             },
             {
-                imageUrl: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-                title: "Cocina Minimalista",
-                description: "Espacios funcionales con líneas limpias y materiales de alta calidad"
+                imageUrl: "https://images.unsplash.com/photo-1544984243-ec57ea16fe25?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                title: "Detalles arquitectónicos"
             },
             {
-                imageUrl: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-                title: "Dormitorio Principal",
-                description: "Ambiente acogedor con iluminación cálida y texturas suaves"
+                imageUrl: "https://images.unsplash.com/photo-1513584684374-8bab748fbf90?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                title: "Ambiente acogedor"
             }
         ];
 
         // Función para crear una tarjeta
-        function createCard(project) {
+        function createCard(image) {
             return `
                 <div class="card">
-                    <img src="${project.imageUrl}" alt="${project.title}" class="card-img">
+                    <img src="${image.imageUrl}" alt="${image.title}" class="card-img">
                     <div class="card-content">
-                        <h3>${project.title}</h3>
-                        <p>${project.description}</p>
+                        <h3>${image.title}</h3>
                     </div>
                 </div>
             `;
@@ -384,36 +341,34 @@
             const cardsContainer = document.getElementById('cards-container');
             cardsContainer.innerHTML = '';
             
-            // Obtener proyectos del localStorage o usar los iniciales
-            const projects = JSON.parse(localStorage.getItem('projects')) || initialProjects;
+            // Obtener imágenes del localStorage o usar las iniciales
+            const images = JSON.parse(localStorage.getItem('images')) || initialImages;
             
-            projects.forEach(project => {
-                cardsContainer.innerHTML += createCard(project);
+            images.forEach(image => {
+                cardsContainer.innerHTML += createCard(image);
             });
         }
 
-        // Función para agregar un nuevo proyecto
-        function addProject(event) {
+        // Función para agregar una nueva imagen
+        function addImage(event) {
             event.preventDefault();
             
             const imageUrl = document.getElementById('image-url').value;
             const title = document.getElementById('image-title').value;
-            const description = document.getElementById('image-description').value;
             
-            const newProject = {
+            const newImage = {
                 imageUrl,
-                title,
-                description
+                title
             };
             
-            // Obtener proyectos existentes
-            const projects = JSON.parse(localStorage.getItem('projects')) || initialProjects;
+            // Obtener imágenes existentes
+            const images = JSON.parse(localStorage.getItem('images')) || initialImages;
             
-            // Agregar el nuevo proyecto
-            projects.push(newProject);
+            // Agregar la nueva imagen
+            images.push(newImage);
             
             // Guardar en localStorage
-            localStorage.setItem('projects', JSON.stringify(projects));
+            localStorage.setItem('images', JSON.stringify(images));
             
             // Volver a renderizar las tarjetas
             renderCards();
@@ -421,7 +376,7 @@
             // Limpiar el formulario
             document.getElementById('image-form').reset();
             
-            alert('Proyecto agregado exitosamente!');
+            alert('Imagen agregada exitosamente!');
         }
 
         // Inicializar la página
@@ -429,7 +384,7 @@
             renderCards();
             
             // Agregar evento al formulario
-            document.getElementById('image-form').addEventListener('submit', addProject);
+            document.getElementById('image-form').addEventListener('submit', addImage);
         });
     </script>
 </body>
