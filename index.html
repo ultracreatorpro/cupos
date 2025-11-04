@@ -26,18 +26,40 @@
             padding: 0 15px;
         }
         
-        /* Header */
+        /* Header Navideño */
         header {
-            background-color: #232f3e;
+            background: linear-gradient(rgba(200, 0, 0, 0.8), rgba(150, 0, 0, 0.9)), url('https://images.unsplash.com/photo-1545424920-5f534e75480f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
             color: white;
             padding: 15px 0;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: linear-gradient(90deg, 
+                #1a8a1a 0%, #1a8a1a 20%, 
+                #ffffff 20%, #ffffff 40%, 
+                #1a8a1a 40%, #1a8a1a 60%, 
+                #ffffff 60%, #ffffff 80%, 
+                #1a8a1a 80%, #1a8a1a 100%);
+            z-index: 1;
         }
         
         .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
+            z-index: 2;
         }
         
         .logo {
@@ -46,11 +68,13 @@
             color: white;
             display: flex;
             align-items: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
         
         .logo i {
-            color: #ff9900;
+            color: #ffd700;
             margin-right: 10px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
         }
         
         .search-bar {
@@ -66,15 +90,21 @@
             border: none;
             border-radius: 4px 0 0 4px;
             font-size: 16px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         
         .search-bar button {
-            background-color: #ff9900;
+            background-color: #1a8a1a;
             border: none;
             padding: 0 15px;
             border-radius: 0 4px 4px 0;
             cursor: pointer;
             color: white;
+            transition: background-color 0.3s;
+        }
+        
+        .search-bar button:hover {
+            background-color: #136613;
         }
         
         .user-actions a {
@@ -84,10 +114,20 @@
             font-size: 14px;
             display: flex;
             align-items: center;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 12px;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+        
+        .user-actions a:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
         }
         
         .user-actions i {
             margin-right: 5px;
+            color: #ffd700;
         }
         
         /* Productos Populares - Scroll Horizontal */
@@ -131,7 +171,7 @@
         }
         
         .popular-scroll::-webkit-scrollbar-thumb {
-            background: #ff9900;
+            background: #c00;
             border-radius: 10px;
         }
         
@@ -168,7 +208,7 @@
         .popular-price {
             font-size: 16px;
             font-weight: bold;
-            color: #ff9900;
+            color: #c00;
         }
         
         /* Categorías */
@@ -190,7 +230,7 @@
         }
         
         .category:hover, .category.active {
-            background-color: #ff9900;
+            background-color: #c00;
             color: white;
         }
         
@@ -280,14 +320,35 @@
         
         .product-location i {
             margin-right: 5px;
-            color: #ff9900;
+            color: #c00;
+        }
+        
+        .price-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        
+        .original-price {
+            font-size: 14px;
+            color: #999;
+            text-decoration: line-through;
         }
         
         .product-price {
             font-size: 18px;
             font-weight: bold;
-            color: #ff9900;
-            margin-bottom: 12px;
+            color: #1a8a1a;
+        }
+        
+        .discount-badge {
+            background-color: #c00;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
         }
         
         .btn-whatsapp {
@@ -394,12 +455,12 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
+    <!-- Header Navideño -->
     <header>
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <i class="fas fa-shopping-bag"></i>
+                    <i class="fas fa-gift"></i>
                     Comprando en Cuba
                 </div>
                 <div class="search-bar">
@@ -570,7 +631,7 @@
     </footer>
 
     <script>
-        // Datos de productos con ubicaciones y números de WhatsApp diferentes
+        // Datos de productos con ubicaciones, números de WhatsApp y precios con descuento
         const products = [
             {
                 id: 1,
@@ -578,6 +639,8 @@
                 title: "Auriculares Inalámbricos",
                 subtitle: "Auriculares con cancelación de ruido, batería de larga duración y sonido de alta calidad.",
                 price: "$89.99",
+                originalPrice: "$129.99",
+                discount: "31%",
                 popular: true,
                 category: "electronics",
                 location: "Centro Habana",
@@ -589,6 +652,8 @@
                 title: "Cámara Digital Profesional",
                 subtitle: "Cámara DSLR con lente intercambiable, 24.2 MP y grabación de video 4K.",
                 price: "$599.99",
+                originalPrice: "$799.99",
+                discount: "25%",
                 popular: true,
                 category: "electronics",
                 location: "Vedado",
@@ -600,6 +665,8 @@
                 title: "Smartwatch Deportivo",
                 subtitle: "Reloj inteligente con monitor de frecuencia cardíaca, GPS y resistencia al agua.",
                 price: "$199.99",
+                originalPrice: "$299.99",
+                discount: "33%",
                 popular: true,
                 category: "electronics",
                 location: "Miramar",
@@ -611,6 +678,8 @@
                 title: "Zapatillas Deportivas",
                 subtitle: "Zapatillas para running con amortiguación de aire y suela antideslizante.",
                 price: "$129.99",
+                originalPrice: "$179.99",
+                discount: "28%",
                 popular: true,
                 category: "sports",
                 location: "Playa",
@@ -622,6 +691,8 @@
                 title: "Juego de Sala Moderno",
                 subtitle: "Juego de sala con diseño contemporáneo, cómodo y duradero.",
                 price: "$450.00",
+                originalPrice: "$650.00",
+                discount: "31%",
                 popular: false,
                 category: "home",
                 location: "Cerro",
@@ -633,6 +704,8 @@
                 title: "Vestido de Noche Elegante",
                 subtitle: "Vestido largo para ocasiones especiales, disponible en varios colores.",
                 price: "$75.00",
+                originalPrice: "$120.00",
+                discount: "38%",
                 popular: false,
                 category: "fashion",
                 location: "Habana Vieja",
@@ -644,6 +717,8 @@
                 title: "Bicicleta de Montaña",
                 subtitle: "Bicicleta todo terreno con suspensión delantera y 21 velocidades.",
                 price: "$320.00",
+                originalPrice: "$450.00",
+                discount: "29%",
                 popular: false,
                 category: "sports",
                 location: "Boyeros",
@@ -655,6 +730,8 @@
                 title: "Set de Construcción",
                 subtitle: "Set educativo de construcción con 250 piezas para desarrollar creatividad.",
                 price: "$45.00",
+                originalPrice: "$65.00",
+                discount: "31%",
                 popular: false,
                 category: "toys",
                 location: "10 de Octubre",
@@ -692,7 +769,11 @@
                         <div class="product-location">
                             <i class="fas fa-map-marker-alt"></i> ${product.location}
                         </div>
-                        <div class="product-price">${product.price}</div>
+                        <div class="price-container">
+                            <span class="original-price">${product.originalPrice}</span>
+                            <span class="product-price">${product.price}</span>
+                            <span class="discount-badge">-${product.discount}</span>
+                        </div>
                         <a href="https://wa.me/${product.whatsapp}?text=Hola,%20estoy%20interesado%20en%20el%20producto:%20${encodeURIComponent(product.title)}" 
                            class="btn-whatsapp" target="_blank">
                             <i class="fab fa-whatsapp"></i> Comprar por WhatsApp
@@ -900,4 +981,3 @@
     </script>
 </body>
 </html>
-
