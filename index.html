@@ -90,28 +90,6 @@
             margin-right: 5px;
         }
         
-        /* Hero Section */
-        .hero {
-            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1607082350899-7e105aa886ae?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
-            background-size: cover;
-            background-position: center;
-            color: white;
-            text-align: center;
-            padding: 80px 0;
-            margin-bottom: 40px;
-        }
-        
-        .hero h1 {
-            font-size: 42px;
-            margin-bottom: 20px;
-        }
-        
-        .hero p {
-            font-size: 20px;
-            max-width: 700px;
-            margin: 0 auto 30px;
-        }
-        
         /* Productos Populares - Scroll Horizontal */
         .popular-products {
             margin-bottom: 40px;
@@ -402,14 +380,6 @@
             .user-actions {
                 margin-top: 10px;
             }
-            
-            .hero h1 {
-                font-size: 32px;
-            }
-            
-            .hero p {
-                font-size: 18px;
-            }
         }
         
         @media (max-width: 480px) {
@@ -437,7 +407,7 @@
                     <button id="search-btn"><i class="fas fa-search"></i></button>
                 </div>
                 <div class="user-actions">
-                    <a href="https://wa.me/1234567890?text=Hola,%20estoy%20interesado%20en%20ser%20vendedor" target="_blank" id="seller-link">
+                    <a href="https://wa.me/5351234567?text=Hola,%20estoy%20interesado%20en%20ser%20vendedor" target="_blank" id="seller-link">
                         <i class="fas fa-user"></i> Ser Vendedor
                     </a>
                     <a href="#" id="favorites-link"><i class="fas fa-heart"></i> Tus Favoritos</a>
@@ -600,7 +570,7 @@
     </footer>
 
     <script>
-        // Datos de productos con ubicaciones diferentes
+        // Datos de productos con ubicaciones y números de WhatsApp diferentes
         const products = [
             {
                 id: 1,
@@ -610,7 +580,8 @@
                 price: "$89.99",
                 popular: true,
                 category: "electronics",
-                location: "Centro Habana"
+                location: "Centro Habana",
+                whatsapp: "5351234567"
             },
             {
                 id: 2,
@@ -620,7 +591,8 @@
                 price: "$599.99",
                 popular: true,
                 category: "electronics",
-                location: "Vedado"
+                location: "Vedado",
+                whatsapp: "5352345678"
             },
             {
                 id: 3,
@@ -630,7 +602,8 @@
                 price: "$199.99",
                 popular: true,
                 category: "electronics",
-                location: "Miramar"
+                location: "Miramar",
+                whatsapp: "5353456789"
             },
             {
                 id: 4,
@@ -640,7 +613,8 @@
                 price: "$129.99",
                 popular: true,
                 category: "sports",
-                location: "Playa"
+                location: "Playa",
+                whatsapp: "5354567890"
             },
             {
                 id: 5,
@@ -650,7 +624,8 @@
                 price: "$450.00",
                 popular: false,
                 category: "home",
-                location: "Cerro"
+                location: "Cerro",
+                whatsapp: "5355678901"
             },
             {
                 id: 6,
@@ -660,7 +635,8 @@
                 price: "$75.00",
                 popular: false,
                 category: "fashion",
-                location: "Habana Vieja"
+                location: "Habana Vieja",
+                whatsapp: "5356789012"
             },
             {
                 id: 7,
@@ -670,7 +646,8 @@
                 price: "$320.00",
                 popular: false,
                 category: "sports",
-                location: "Boyeros"
+                location: "Boyeros",
+                whatsapp: "5357890123"
             },
             {
                 id: 8,
@@ -680,7 +657,8 @@
                 price: "$45.00",
                 popular: false,
                 category: "toys",
-                location: "10 de Octubre"
+                location: "10 de Octubre",
+                whatsapp: "5358901234"
             }
         ];
 
@@ -715,7 +693,7 @@
                             <i class="fas fa-map-marker-alt"></i> ${product.location}
                         </div>
                         <div class="product-price">${product.price}</div>
-                        <a href="https://wa.me/1234567890?text=Hola,%20estoy%20interesado%20en%20el%20producto:%20${encodeURIComponent(product.title)}" 
+                        <a href="https://wa.me/${product.whatsapp}?text=Hola,%20estoy%20interesado%20en%20el%20producto:%20${encodeURIComponent(product.title)}" 
                            class="btn-whatsapp" target="_blank">
                             <i class="fab fa-whatsapp"></i> Comprar por WhatsApp
                         </a>
