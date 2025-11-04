@@ -231,6 +231,8 @@
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
             transition: transform 0.3s, box-shadow 0.3s;
             position: relative;
+            display: flex;
+            flex-direction: column;
         }
         
         .product-card:hover {
@@ -272,6 +274,9 @@
         
         .product-content {
             padding: 15px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
         }
         
         .product-title {
@@ -284,8 +289,7 @@
             color: #666;
             font-size: 13px;
             margin-bottom: 8px;
-            height: 40px;
-            overflow: hidden;
+            flex-grow: 1;
         }
         
         .product-location {
@@ -320,10 +324,21 @@
             font-weight: bold;
             font-size: 14px;
             transition: background-color 0.3s;
+            margin-top: auto;
         }
         
         .btn-whatsapp:hover {
             background-color: #128C7E;
+        }
+        
+        /* Secciones de categorías */
+        .category-section {
+            margin-bottom: 60px;
+            display: none;
+        }
+        
+        .category-section.active {
+            display: block;
         }
         
         /* Footer */
@@ -422,7 +437,9 @@
                     <button id="search-btn"><i class="fas fa-search"></i></button>
                 </div>
                 <div class="user-actions">
-                    <a href="#"><i class="fas fa-user"></i> Ser Vendedor</a>
+                    <a href="https://wa.me/1234567890?text=Hola,%20estoy%20interesado%20en%20ser%20vendedor" target="_blank" id="seller-link">
+                        <i class="fas fa-user"></i> Ser Vendedor
+                    </a>
                     <a href="#" id="favorites-link"><i class="fas fa-heart"></i> Tus Favoritos</a>
                 </div>
             </div>
@@ -455,15 +472,87 @@
         </div>
     </section>
 
-    <!-- Productos Destacados -->
-    <section class="container">
-        <div class="section-title">
-            <h2>Productos Destacados</h2>
-            <p>Los artículos más populares de nuestra tienda</p>
+    <!-- Sección Todos (Productos Destacados) -->
+    <section id="all" class="category-section active">
+        <div class="container">
+            <div class="section-title">
+                <h2>Productos Destacados</h2>
+                <p>Los artículos más populares de nuestra tienda</p>
+            </div>
+            
+            <div class="products-grid" id="products-container">
+                <!-- Los productos se generarán dinámicamente con JavaScript -->
+            </div>
         </div>
-        
-        <div class="products-grid" id="products-container">
-            <!-- Los productos se generarán dinámicamente con JavaScript -->
+    </section>
+
+    <!-- Sección Electrónicos -->
+    <section id="electronics" class="category-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Electrónicos</h2>
+                <p>Los mejores dispositivos electrónicos</p>
+            </div>
+            
+            <div class="products-grid" id="electronics-container">
+                <!-- Los productos de electrónicos se generarán dinámicamente con JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Hogar -->
+    <section id="home" class="category-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Hogar</h2>
+                <p>Productos para tu hogar</p>
+            </div>
+            
+            <div class="products-grid" id="home-container">
+                <!-- Los productos de hogar se generarán dinámicamente con JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Moda -->
+    <section id="fashion" class="category-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Moda</h2>
+                <p>Lo último en moda y tendencias</p>
+            </div>
+            
+            <div class="products-grid" id="fashion-container">
+                <!-- Los productos de moda se generarán dinámicamente con JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Deportes -->
+    <section id="sports" class="category-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Deportes</h2>
+                <p>Equipamiento y accesorios deportivos</p>
+            </div>
+            
+            <div class="products-grid" id="sports-container">
+                <!-- Los productos de deportes se generarán dinámicamente con JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Juguetes -->
+    <section id="toys" class="category-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Juguetes</h2>
+                <p>Diversión para todas las edades</p>
+            </div>
+            
+            <div class="products-grid" id="toys-container">
+                <!-- Los productos de juguetes se generarán dinámicamente con JavaScript -->
+            </div>
         </div>
     </section>
 
@@ -505,13 +594,13 @@
                 </div>
             </div>
             <div class="copyright">
-                &copy; 2023 TiendaVirtual. Todos los derechos reservados.
+                &copy; 2023 Comprando en Cuba. Todos los derechos reservados.
             </div>
         </div>
     </footer>
 
     <script>
-        // Datos de productos
+        // Datos de productos con ubicaciones diferentes
         const products = [
             {
                 id: 1,
@@ -520,7 +609,8 @@
                 subtitle: "Auriculares con cancelación de ruido, batería de larga duración y sonido de alta calidad.",
                 price: "$89.99",
                 popular: true,
-                category: "electronics"
+                category: "electronics",
+                location: "Centro Habana"
             },
             {
                 id: 2,
@@ -529,7 +619,8 @@
                 subtitle: "Cámara DSLR con lente intercambiable, 24.2 MP y grabación de video 4K.",
                 price: "$599.99",
                 popular: true,
-                category: "electronics"
+                category: "electronics",
+                location: "Vedado"
             },
             {
                 id: 3,
@@ -538,7 +629,8 @@
                 subtitle: "Reloj inteligente con monitor de frecuencia cardíaca, GPS y resistencia al agua.",
                 price: "$199.99",
                 popular: true,
-                category: "electronics"
+                category: "electronics",
+                location: "Miramar"
             },
             {
                 id: 4,
@@ -547,25 +639,48 @@
                 subtitle: "Zapatillas para running con amortiguación de aire y suela antideslizante.",
                 price: "$129.99",
                 popular: true,
-                category: "sports"
+                category: "sports",
+                location: "Playa"
             },
             {
                 id: 5,
-                image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-                title: "Smartwatch Deportivo",
-                subtitle: "Reloj inteligente con monitor de frecuencia cardíaca, GPS y resistencia al agua.",
-                price: "$199.99",
-                popular: true,
-                category: "electronics"
+                image: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                title: "Juego de Sala Moderno",
+                subtitle: "Juego de sala con diseño contemporáneo, cómodo y duradero.",
+                price: "$450.00",
+                popular: false,
+                category: "home",
+                location: "Cerro"
             },
             {
                 id: 6,
-                image: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-                title: "Zapatillas Deportivas",
-                subtitle: "Zapatillas para running con amortiguación de aire y suela antideslizante.",
-                price: "$129.99",
-                popular: true,
-                category: "sports"
+                image: "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                title: "Vestido de Noche Elegante",
+                subtitle: "Vestido largo para ocasiones especiales, disponible en varios colores.",
+                price: "$75.00",
+                popular: false,
+                category: "fashion",
+                location: "Habana Vieja"
+            },
+            {
+                id: 7,
+                image: "https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                title: "Bicicleta de Montaña",
+                subtitle: "Bicicleta todo terreno con suspensión delantera y 21 velocidades.",
+                price: "$320.00",
+                popular: false,
+                category: "sports",
+                location: "Boyeros"
+            },
+            {
+                id: 8,
+                image: "https://images.unsplash.com/photo-1587654780291-39c9404d746b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                title: "Set de Construcción",
+                subtitle: "Set educativo de construcción con 250 piezas para desarrollar creatividad.",
+                price: "$45.00",
+                popular: false,
+                category: "toys",
+                location: "10 de Octubre"
             }
         ];
 
@@ -597,7 +712,7 @@
                         <h3 class="product-title">${product.title}</h3>
                         <p class="product-subtitle">${product.subtitle}</p>
                         <div class="product-location">
-                            <i class="fas fa-map-marker-alt"></i> Habana
+                            <i class="fas fa-map-marker-alt"></i> ${product.location}
                         </div>
                         <div class="product-price">${product.price}</div>
                         <a href="https://wa.me/1234567890?text=Hola,%20estoy%20interesado%20en%20el%20producto:%20${encodeURIComponent(product.title)}" 
@@ -619,14 +734,23 @@
             });
         }
 
-        // Función para renderizar los productos
-        function renderProducts(filteredProducts = products) {
-            const productsContainer = document.getElementById('products-container');
-            productsContainer.innerHTML = '';
+        // Función para renderizar los productos por categoría
+        function renderProductsByCategory() {
+            const categories = ['all', 'electronics', 'home', 'fashion', 'sports', 'toys'];
             
-            // Renderizar productos
-            filteredProducts.forEach(product => {
-                productsContainer.innerHTML += createProductCard(product);
+            categories.forEach(category => {
+                const container = document.getElementById(`${category === 'all' ? 'products' : category}-container`);
+                if (container) {
+                    container.innerHTML = '';
+                    
+                    const categoryProducts = category === 'all' 
+                        ? products 
+                        : products.filter(product => product.category === category);
+                    
+                    categoryProducts.forEach(product => {
+                        container.innerHTML += createProductCard(product);
+                    });
+                }
             });
             
             // Agregar eventos a los botones de favoritos
@@ -697,7 +821,7 @@
                 const subtitle = card.querySelector('.product-subtitle').textContent.toLowerCase();
                 
                 if (title.includes(searchTerm) || subtitle.includes(searchTerm)) {
-                    card.style.display = 'block';
+                    card.style.display = 'flex';
                 } else {
                     card.style.display = 'none';
                 }
@@ -707,24 +831,36 @@
         // Función para mostrar solo favoritos
         function showFavorites() {
             const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-            const favoriteProducts = products.filter(product => favorites.includes(product.id.toString()));
-            renderProducts(favoriteProducts);
+            const allProductCards = document.querySelectorAll('.product-card');
+            
+            allProductCards.forEach(card => {
+                const productId = card.getAttribute('data-id');
+                if (favorites.includes(productId)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
         }
 
-        // Función para filtrar por categoría
-        function filterByCategory(category) {
-            if (category === 'all') {
-                renderProducts(products);
-            } else {
-                const filteredProducts = products.filter(product => product.category === category);
-                renderProducts(filteredProducts);
+        // Función para cambiar de categoría
+        function switchCategory(category) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.category-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Mostrar la sección seleccionada
+            const targetSection = document.getElementById(category);
+            if (targetSection) {
+                targetSection.classList.add('active');
             }
         }
 
         // Auto-scroll para productos populares
         let scrollInterval;
         let currentScrollPosition = 0;
-        const scrollStep = 200; // Cantidad de píxeles a desplazar
+        const scrollStep = 200;
         const scrollDelay = 2000; // 2 segundos
 
         function startAutoScroll() {
@@ -739,7 +875,7 @@
                     currentScrollPosition = 0;
                     popularScroll.scrollTo({
                         left: 0,
-                        behavior: 'instant'
+                        behavior: 'smooth'
                     });
                 } else {
                     popularScroll.scrollTo({
@@ -753,7 +889,7 @@
         // Inicializar la página
         document.addEventListener('DOMContentLoaded', function() {
             renderPopularProducts();
-            renderProducts();
+            renderProductsByCategory();
             
             // Agregar funcionalidad a las categorías
             const categories = document.querySelectorAll('.category');
@@ -762,7 +898,7 @@
                     categories.forEach(c => c.classList.remove('active'));
                     this.classList.add('active');
                     const categoryValue = this.getAttribute('data-category');
-                    filterByCategory(categoryValue);
+                    switchCategory(categoryValue);
                 });
             });
             
@@ -786,8 +922,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
