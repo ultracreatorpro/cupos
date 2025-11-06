@@ -410,6 +410,139 @@
             font-size: 14px;
         }
         
+        /* Botón Flotante de WhatsApp */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 60px;
+            height: 60px;
+            background-color: #25D366;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            animation: pulse 2s infinite;
+        }
+        
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(37, 211, 102, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+            }
+        }
+        
+        /* Modal de Vendedor */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            transform: translateY(-50px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s;
+        }
+        
+        .modal-close:hover {
+            color: #c00;
+        }
+        
+        .modal-icon {
+            font-size: 48px;
+            color: #25D366;
+            margin-bottom: 15px;
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            color: #232f3e;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .modal-text {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+        
+        .modal-whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+        }
+        
+        .modal-whatsapp-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+        }
+        
         /* Responsive */
         @media (max-width: 768px) {
             .header-content {
@@ -425,6 +558,19 @@
             .user-actions {
                 margin-top: 10px;
             }
+            
+            .whatsapp-float {
+                bottom: 20px;
+                right: 20px;
+                width: 55px;
+                height: 55px;
+                font-size: 24px;
+            }
+            
+            .modal-content {
+                padding: 20px;
+                margin: 20px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -434,6 +580,14 @@
             
             .popular-card {
                 min-width: 150px;
+            }
+            
+            .modal-title {
+                font-size: 20px;
+            }
+            
+            .modal-text {
+                font-size: 14px;
             }
         }
     </style>
@@ -624,10 +778,37 @@
                 </div>
             </div>
             <div class="copyright">
-                &copy; 2025 Comprando en Cuba. Todos los derechos reservados.
+                © 2025 Comprando en Cuba. Todos los derechos reservados.
             </div>
         </div>
     </footer>
+
+    <!-- Botón Flotante de WhatsApp -->
+    <a href="https://wa.me/18297206225?text=Hola,%20necesito%20soporte%20o%20información" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- Modal de Vendedor -->
+    <div class="modal-overlay" id="sellerModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-icon">
+                <i class="fab fa-whatsapp"></i>
+            </div>
+            <h2 class="modal-title">¡Conviértete en Vendedor!</h2>
+            <p class="modal-text">
+                ¿Tienes productos o servicios que ofrecer? Únete a nuestra plataforma y llega a miles de clientes potenciales. 
+                Por un económico precio durante un mes entero tu anuncio (con el producto o servicio que vendas) se mostrará en esta página generándote muchísimas ventas.
+            </p>
+            <a href="https://wa.me/18297206225?text=Hola,%20estoy%20interesado%20en%20ser%20vendedor%20en%20Comprando%20en%20Cuba" 
+               class="modal-whatsapp-btn" target="_blank">
+                <i class="fab fa-whatsapp"></i>
+                Contactar por WhatsApp
+            </a>
+        </div>
+    </div>
 
     <script>
         // Datos de productos con ubicaciones, números de WhatsApp y precios con descuento
@@ -874,7 +1055,7 @@
             }
         }
 
-        // Función para eliminar de favoritos
+                // Función para eliminar de favoritos
         function removeFromFavorites(productId) {
             let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
             favorites = favorites.filter(id => id !== productId);
@@ -970,6 +1151,55 @@
             }, scrollDelay);
         }
 
+        
+            // Funciones para el Modal
+function showModal() {
+    const modal = document.getElementById('sellerModal');
+    modal.classList.add('active');
+    // Guardar la fecha/hora en que se mostró el modal
+    const now = new Date().getTime();
+    localStorage.setItem('modalLastShown', now);
+}
+
+function hideModal() {
+    const modal = document.getElementById('sellerModal');
+    modal.classList.remove('active');
+}
+
+function setupModal() {
+    const modal = document.getElementById('sellerModal');
+    const closeBtn = document.getElementById('modalClose');
+    
+    // Cerrar modal al hacer clic en la X
+    closeBtn.addEventListener('click', hideModal);
+    
+    // Cerrar modal al hacer clic fuera del contenido
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            hideModal();
+        }
+    });
+    
+    // Cerrar modal con tecla ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            hideModal();
+        }
+    });
+}
+
+// Función para mostrar el modal después de 10 segundos (cada 24 horas)
+function scheduleModal() {
+    const lastShown = localStorage.getItem('modalLastShown');
+    const now = new Date().getTime();
+    const twentyFourHours = 24 * 60 * 60 * 1000; // 24 horas en milisegundos
+    
+    // Si nunca se mostró o pasaron más de 24 horas, mostrar el modal
+    if (!lastShown || (now - lastShown) > twentyFourHours) {
+        setTimeout(showModal, 10000); // 10000 ms = 10 segundos
+    }
+}
+
         // Inicializar la página
         document.addEventListener('DOMContentLoaded', function() {
             renderPopularProducts();
@@ -1000,32 +1230,15 @@
                 showFavorites();
             });
             
+            // Configurar el modal
+            setupModal();
+            
+            // Programar la aparición del modal
+            scheduleModal();
+            
             // Iniciar auto-scroll
             startAutoScroll();
         });
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
