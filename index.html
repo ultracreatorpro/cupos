@@ -482,7 +482,7 @@
             <div class="category" data-category="electronics">Electrónicos</div>
             <div class="category" data-category="home">Hogar</div>
             <div class="category" data-category="fashion">Moda</div>
-            <div class="category" data-category="sports">Deportes</div>
+            <div class="category" data-category="meal">Comida</div>
             <div class="category" data-category="toys">Juguetes</div>
             <div class="category" data-category="services">Servicios</div>
         </div>
@@ -544,16 +544,16 @@
         </div>
     </section>
 
-    <!-- Sección Deportes -->
-    <section id="sports" class="category-section">
+    <!-- Sección Comida -->
+    <section id="meal" class="category-section">
         <div class="container">
             <div class="section-title">
-                <h2>Deportes</h2>
-                <p>Equipamiento y accesorios deportivos</p>
+                <h2>Comida</h2>
+                <p>Todo tipo de alimentos y combos de comida</p>
             </div>
             
             <div class="products-grid" id="sports-container">
-                <!-- Los productos de deportes se generarán dinámicamente con JavaScript -->
+                <!-- Los productos de comida se generarán dinámicamente con JavaScript -->
             </div>
         </div>
     </section>
@@ -680,7 +680,7 @@
                 originalPrice: "$179.99",
                 discount: "28%",
                 popular: true,
-                category: "sports",
+                category: "meal",
                 location: "La Habana - Playa",
                 whatsapp: "5354567890"
             },
@@ -719,7 +719,7 @@
                 originalPrice: "$450.00",
                 discount: "29%",
                 popular: false,
-                category: "sports",
+                category: "meal",
                 location: "La Habana - Boyeros",
                 whatsapp: "5357890123"
             },
@@ -820,7 +820,7 @@
 
         // Función para renderizar los productos por categoría
         function renderProductsByCategory() {
-            const categories = ['all', 'electronics', 'home', 'fashion', 'sports', 'toys' , `services`];
+            const categories = ['all', 'electronics', 'home', 'fashion', 'meal', 'toys' , `services`];
             
             categories.forEach(category => {
                 const container = document.getElementById(`${category === 'all' ? 'products' : category}-container`);
@@ -1006,6 +1006,7 @@
     </script>
 </body>
 </html>
+
 
 
 
