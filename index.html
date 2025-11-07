@@ -1075,7 +1075,7 @@
 
         // Función para renderizar los productos por categoría
         function renderProductsByCategory() {
-            const categories = ['all', 'electronics', 'home', 'fashion', 'meal', 'toys' , `services`];
+            const categories = ['all', 'electronics', 'home', 'fashion', 'meal', 'toys' , `services` , `houses` , `varied` , `money`];
             
             categories.forEach(category => {
                 const container = document.getElementById(`${category === 'all' ? 'products' : category}-container`);
@@ -1316,6 +1316,7 @@ function scheduleModal() {
     </script>
 </body>
 </html>
+
 
 
 
