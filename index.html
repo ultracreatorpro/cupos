@@ -1285,7 +1285,7 @@
         ];
 
         // Productos populares (los 5 primeros)
-        const popularProducts = products.filter(product => product.popular === true).slice(1, 5);
+        const popularProducts = products.filter(product => product.popular === true).slice(0, 4);
 
         // Función para crear una tarjeta de producto popular CON WHATSAPP
         function createPopularCard(product) {
@@ -1627,6 +1627,7 @@
     </script>
 </body>
 </html>
+
 
 
 
