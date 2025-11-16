@@ -46,54 +46,31 @@
     <meta property="og:site_name" content="Comprando en Cuba">
     <meta property="og:locale" content="es_ES">
     
-    <!-- SCHEMA.ORG PARA E-COMMERCE (CRÍTICO PARA SEO) -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "OnlineStore",
-        "name": "Comprando en Cuba",
-        "description": "Tienda online de productos cubanos con envíos a toda Cuba",
-        "url": "https://comprandoencuba.com",
-        "logo": "https://comprandoencuba.com/favicon-32x32.png",
-        "address": {
-            "@type": "PostalAddress",
-            "addressCountry": "CU",
-            "addressLocality": "La Habana"
-        },
-        "areaServed": ["CU"],
-        "availableLanguage": ["es"],
-        "currenciesAccepted": "USD, EUR, CUP",
-        "priceRange": "$$",
-        "hasOfferCatalog": {
-    "@type": "OfferCatalog",
-    "name": "Productos Cubanos",
-    "itemListElement": [
-        {
-            "@type": "Offer",
-            "itemOffered": {
-                "@type": "Product",
-                "name": "Productos típicos cubanos",
-                "description": "Variedad de productos típicos y auténticos de Cuba disponibles para envío a toda la isla",
-                "category": "Productos Cubanos",
-                "image": "https://comprandoencuba.com/favicon-32x32.png"
-            },
-            "priceCurrency": "USD",
-            "price": "10.00",
-            "availability": "https://schema.org/InStock",
-            "seller": {
-                "@type": "Organization",
-                "name": "Comprando en Cuba"
-            }
-        }
-    ]
-},
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": "https://comprandoencuba.com/buscar?q={search_term_string}",
-            "query-input": "required name=search_term_string"
-        }
+    <!-- SCHEMA.ORG PARA E-COMMERCE (CORREGIDO) -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "OnlineStore",
+    "name": "Comprando en Cuba",
+    "description": "Tienda online de productos cubanos con envíos a toda Cuba",
+    "url": "https://comprandoencuba.com",
+    "logo": "https://comprandoencuba.com/favicon-32x32.png",
+    "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "CU",
+        "addressLocality": "La Habana"
+    },
+    "areaServed": ["CU"],
+    "availableLanguage": ["es"],
+    "currenciesAccepted": "USD, EUR, CUP",
+    "priceRange": "$$",
+    "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://comprandoencuba.com/buscar?q={search_term_string}",
+        "query-input": "required name=search_term_string"
     }
-    </script>
+}
+</script>
     
     <!-- CANONICAL URL -->
     <link rel="canonical" href="https://comprandoencuba.com">
@@ -1638,6 +1615,7 @@
     </script>
 </body>
 </html>
+
 
 
 
