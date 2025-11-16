@@ -65,18 +65,28 @@
         "currenciesAccepted": "USD, EUR, CUP",
         "priceRange": "$$",
         "hasOfferCatalog": {
-            "@type": "OfferCatalog",
-            "name": "Productos Cubanos",
-            "itemListElement": [
-                {
-                    "@type": "Offer",
-                    "itemOffered": {
-                        "@type": "Product",
-                        "name": "Productos típicos cubanos"
-                    }
-                }
-            ]
-        },
+    "@type": "OfferCatalog",
+    "name": "Productos Cubanos",
+    "itemListElement": [
+        {
+            "@type": "Offer",
+            "itemOffered": {
+                "@type": "Product",
+                "name": "Productos típicos cubanos",
+                "description": "Variedad de productos típicos y auténticos de Cuba disponibles para envío a toda la isla",
+                "category": "Productos Cubanos",
+                "image": "https://comprandoencuba.com/favicon-32x32.png"
+            },
+            "priceCurrency": "USD",
+            "price": "10.00",
+            "availability": "https://schema.org/InStock",
+            "seller": {
+                "@type": "Organization",
+                "name": "Comprando en Cuba"
+            }
+        }
+    ]
+},
         "potentialAction": {
             "@type": "SearchAction",
             "target": "https://comprandoencuba.com/buscar?q={search_term_string}",
@@ -1628,6 +1638,7 @@
     </script>
 </body>
 </html>
+
 
 
 
